@@ -61,6 +61,14 @@ template <class data_t> struct AllRhos
     data_t GB;
 };
 
+// Weak Coupling Conditions
+template <class data_t> struct WeakCouplingConditions
+{
+    data_t g2;
+    data_t g3;
+    data_t GB;
+};
+
 template <class theory_t, class gauge_t = ModifiedPunctureGauge,
           class deriv_t = FourthOrderDerivatives>
 class ModifiedCCZ4RHS : public CCZ4RHS<gauge_t, deriv_t>
@@ -119,7 +127,7 @@ class ModifiedCCZ4RHS : public CCZ4RHS<gauge_t, deriv_t>
        Newton's constant, which is set to one by default.
     */
     ModifiedCCZ4RHS(theory_t a_theory, modified_params_t a_params,
-                    gauge_t a_gauge, double a_dx, double a_sigma,
+                    gauge_t a_gauge, double a_dx, double a_sigma, double a_K_mean, double a_rho_mean,
                     const std::array<double, CH_SPACEDIM> a_center,
                     double a_G_Newton = 1.0);
 
@@ -178,6 +186,9 @@ class ModifiedCCZ4RHS : public CCZ4RHS<gauge_t, deriv_t>
     gauge_t my_gauge;   //!< The gauge object, which includes a(x) and b(x)
     const std::array<double, CH_SPACEDIM> m_center; //!< The center of the grid
     double m_G_Newton;
+    //---added
+    double a_rho_mean;
+    //double a_S_mean;
 };
 
 #include "ModifiedCCZ4RHS.impl.hpp"

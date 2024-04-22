@@ -16,6 +16,9 @@
 #include "simd.hpp"
 #include <array>
 
+#include "CCZ4RHS.hpp"
+#include "ModifiedPunctureGauge.hpp"
+
 //!  Calculates the Hamiltonian and Momentum constraints with the theory fields
 /*!
      The class calculates the Hamiltonian and Momentum constraints at each point
@@ -29,21 +32,47 @@
 template <class theory_t> class ModifiedGravityConstraints : public Constraints
 {
   public:
+    //using CCZ4 = CCZ4RHS<gauge_t, deriv_t>;
+
+    //using modified_params_t = CCZ4_params_t<typename gauge_t::params_t>;
+
     template <class data_t>
     using TheoryVars = typename theory_t::template Vars<data_t>;
 
+    //template <class data_t>
+    //using CCZ4Vars = typename CCZ4::template Vars<data_t>;
+
+//public Constraints::MetricVars<data_t>,
+//public CCZ4Vars<data_t> 
     // Inherit the variable definitions from CCZ4 + theory_t
     template <class data_t>
     struct BSSNTheoryVars : public Constraints::MetricVars<data_t>,
-                            public TheoryVars<data_t>
+                            public TheoryVars<data_t>                  
     {
+        //--- added vars to compute Sij
+        data_t lapse;
+        Tensor<1, data_t> shift;
+        Tensor<1, data_t> B; //!< \f$B^i = \partial_t \beta^i\f$, this is used
+                         //! for second order shift conditions
+        //---
         /// Defines the mapping between members of Vars and Chombo grid
         /// variables (enum in User_Variables)
         template <typename mapping_function_t>
         void enum_mapping(mapping_function_t mapping_function)
         {
+            //--- 
+            using namespace VarsTools; // define_enum_mapping is part of VarsTools
+            //---
             Constraints::MetricVars<data_t>::enum_mapping(mapping_function);
             TheoryVars<data_t>::enum_mapping(mapping_function);
+            //---
+            //CCZ4Vars<data_t>::enum_mapping(mapping_function);
+            define_enum_mapping(mapping_function, c_lapse, lapse);
+            define_enum_mapping(mapping_function,
+                                GRInterval<c_shift1, D_SELECT(, c_shift2, c_shift3)>(), shift);
+            define_enum_mapping(mapping_function,
+                                GRInterval<c_B1, D_SELECT(, c_B2, c_B3)>(), B);
+            //---
         }
     };
 
@@ -54,7 +83,7 @@ template <class theory_t> class ModifiedGravityConstraints : public Constraints
     */
     ModifiedGravityConstraints(const theory_t a_theory, double dx,
                                const std::array<double, CH_SPACEDIM> a_center,
-                               double G_Newton, int a_c_Ham,
+                               double G_Newton, double rho_mean /*added for rho contrast*/, int a_c_Ham,
                                const Interval &a_c_Moms,
                                int a_c_Ham_abs_terms = -1,
                                const Interval &a_c_Moms_abs_terms = Interval());
@@ -67,6 +96,7 @@ template <class theory_t> class ModifiedGravityConstraints : public Constraints
     theory_t my_theory; //!< The theory object, e.g. 4dST
     const std::array<double, CH_SPACEDIM> m_center; //!< The center of the grid
     double m_G_Newton;
+    double m_rho_mean; //---added for rho contrast
 };
 
 #include "ModifiedGravityConstraints.impl.hpp"

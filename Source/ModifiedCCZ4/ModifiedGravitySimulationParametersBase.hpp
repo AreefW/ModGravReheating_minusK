@@ -116,6 +116,7 @@ class ModifiedGravitySimulationParametersBase : public SimulationParametersBase
 
     void check_params()
     {
+        /*
         check_parameter("a(x)", modified_ccz4_params.a0,
                         modified_ccz4_params.a0 > -1, "should be >-1");
         warn_parameter("a(x)", modified_ccz4_params.a0,
@@ -130,6 +131,7 @@ class ModifiedGravitySimulationParametersBase : public SimulationParametersBase
                         modified_ccz4_params.kappa2 >
                             -2. / (2. + modified_ccz4_params.b0),
                         "should be > -2/(2+b(x))");
+        */
     }
 
   public:

@@ -15,9 +15,9 @@
 template <class theory_t, class gauge_t, class deriv_t>
 ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::ModifiedCCZ4RHS(
     theory_t a_theory, modified_params_t a_params, gauge_t a_gauge, double a_dx,
-    double a_sigma, const std::array<double, CH_SPACEDIM> a_center,
+    double a_sigma, double a_K_mean, double a_rho_mean, const std::array<double, CH_SPACEDIM> a_center,
     double a_G_Newton)
-    : CCZ4RHS<gauge_t, deriv_t>(a_params, a_dx, a_sigma, CCZ4RHS<>::USE_CCZ4,
+    : CCZ4RHS<gauge_t, deriv_t>(a_params, a_dx, a_sigma, a_K_mean, CCZ4RHS<>::USE_CCZ4,
                                 0.0 /*No cosmological constant*/),
       my_theory(a_theory), my_gauge(a_gauge), m_center(a_center),
       m_G_Newton(a_G_Newton)

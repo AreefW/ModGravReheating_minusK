@@ -52,12 +52,13 @@ class ModifiedPunctureGauge
     inline void rhs_gauge(vars_t<data_t> &rhs, const vars_t<data_t> &vars,
                           const vars_t<Tensor<1, data_t>> &d1,
                           const diff2_vars_t<Tensor<2, data_t>> &d2,
-                          const vars_t<data_t> &advec) const
+                          const vars_t<data_t> &advec,
+                          double m_K_mean) const //---- added m_K_mean
     {
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
                         pow(vars.lapse, m_params.lapse_power) *
-                        (vars.K - 2 * vars.Theta);
+                        (vars.K - m_K_mean - 2 * vars.Theta); //--- added -m_K_mean 
         FOR(i)
         {
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +
