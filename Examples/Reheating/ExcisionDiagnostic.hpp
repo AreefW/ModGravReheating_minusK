@@ -67,11 +67,12 @@ template <class theory_t> class Excision95Density
     const std::array<double, CH_SPACEDIM> m_center; //!< The grid center >> calculate r from origin
     const FourthOrderDerivatives m_deriv;
     const double m_obj_rho_max; //!< Max density
+    const double m_obj_bound_cutoff; //!< Define boundary of object as fraction of max density
 
   public:
     Excision95Density(const double a_dx, const std::array<double, CH_SPACEDIM> a_center,
-                        const double a_obj_rho_max)
-        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center), m_obj_rho_max(a_obj_rho_max)
+                        const double a_obj_rho_max, const double a_obj_bound_cutoff)
+        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center), m_obj_rho_max(a_obj_rho_max), m_obj_bound_cutoff(a_obj_bound_cutoff)
     {
     }
 
@@ -88,7 +89,7 @@ template <class theory_t> class Excision95Density
         //pout() << "Position of rho_now: " << coords << std::endl;
         //pout() << "Count: " << obj_count << std::endl;
         
-        double rho_cutoff = 0.50 * m_obj_rho_max;
+        double rho_cutoff = m_obj_bound_cutoff * m_obj_rho_max;
         //pout() << "rho95 : " << rho95 << endl;
         //pout() << "rho_now : " << rho_now << endl;
         if (rho_now < rho_cutoff){

@@ -61,6 +61,9 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
         pp.load("kerr_spin", kerr_params.spin);
         pp.load("kerr_center", kerr_params.center, center);
 
+        // Oscillon
+        pp.load("obj_bound_cutoff", obj_bound_cutoff,0.95);
+
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * kerr_params.mass);
 #endif
@@ -87,6 +90,7 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
 
     double G_Newton, rad;
     double obj_r;
+    double obj_bound_cutoff;
     std::array<double, CH_SPACEDIM> center_BS;
     std::array<double, CH_SPACEDIM> center_obj;
     InitialScalarData::params_t initial_params;
