@@ -26,7 +26,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_M_Ni_and_Mij(
     const auto chris = compute_christoffel(d1.h, h_UU);
     const auto ricci0 =
         CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris, {0., 0., 0.});
-    const data_t chi_regularised = simd_max(1e-6, vars.chi);
+    const data_t chi_regularised = simd_max(1e-30, vars.chi);
 
     // M_{ij} = R_{ij} + KK_{ij} - K_{ik}K_j^{~k}
     FOR(i, j)
@@ -93,7 +93,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_Omega_munu(
     const auto chris = compute_christoffel(d1.h, h_UU);
 
     // relevant quantities
-    data_t chi_regularised = simd_max(1e-6, vars.chi);
+    data_t chi_regularised = simd_max(1e-30, vars.chi);
     Tensor<2, data_t> covdtilde2phi;
     Tensor<2, data_t> covd2phi;
     data_t dphi_dot_dchi = compute_dot_product(d1.phi, d1.chi, h_UU);
@@ -176,7 +176,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_rho_and_Si(
               g2 * Vt * (Vt / 4. + vars.Pi * vars.Pi);
 
     // Compute useful quantities for the Gauss-Bonnet sector
-    const data_t chi_regularised = simd_max(1e-6, vars.chi);
+    const data_t chi_regularised = simd_max(1e-30, vars.chi);
 
     ScalarVectorTensor<data_t> SVT = compute_M_Ni_and_Mij(vars, d1, d2);
     data_t M = SVT.scalar;
@@ -275,7 +275,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_Sij_TF_and_S(
     const auto h_UU = compute_inverse_sym(vars.h);
     const auto chris = compute_christoffel(d1.h, h_UU);
 
-    const data_t chi_regularised = simd_max(vars.chi, 1e-6);
+    const data_t chi_regularised = simd_max(vars.chi, 1e-30);
 
     // Useful quantity Vt
     data_t Vt = -vars.Pi * vars.Pi;
@@ -570,7 +570,7 @@ void FourDerivScalarTensor<coupling_and_potential_t>::add_theory_rhs(
 
     // Compute useful quantities for the Gauss-Bonnet sector
 
-    const data_t chi_regularised = simd_max(1e-6, vars.chi);
+    const data_t chi_regularised = simd_max(1e-30, vars.chi);
 
     ScalarVectorTensor<data_t> SVT = compute_M_Ni_and_Mij(vars, d1, d2);
     data_t M = SVT.scalar;
@@ -1033,8 +1033,8 @@ WeakCouplingConditions<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
 
     // Compute useful quantities for the Gauss-Bonnet sector
 
-    const data_t chi_regularised = simd_max(1e-6, vars.chi);
-    const data_t lapse_regularised = simd_max(1e-6, vars.lapse);
+    const data_t chi_regularised = simd_max(1e-30, vars.chi);
+    const data_t lapse_regularised = simd_max(1e-30, vars.lapse);
 
     ScalarVectorTensor<data_t> SVT = compute_M_Ni_and_Mij(vars, d1, d2);
     data_t M = SVT.scalar;
@@ -1220,9 +1220,12 @@ WeakCouplingConditions<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
         data_t r = sqrt(sqrt(ricci0.LL[i][j] * ricci0.LL[i][j]));
         Lm1 = simd_max(Lm1, r);
     }
+    data_t abs_root_V = sqrt(sqrt(V_of_phi * V_of_phi));
+    Lm1 = simd_max(Lm1, abs_root_V);
     RGB = sqrt(RGB * RGB);
     Lm1 = simd_max(Lm1, sqrt(sqrt(RGB)));
-    out.GB = Lm1 * Lm1 * dfdphi;
+    //out.GB = Lm1 * Lm1 * dfdphi;
+    out.GB = Lm1 * Lm1 * sqrt(dfdphi*dfdphi);
 
     data_t weak_g2 = vars.Pi * vars.Pi;
     data_t dphi2 = 0.;

@@ -88,7 +88,7 @@ template <class theory_t> class Excision95Density
         //pout() << "Position of rho_now: " << coords << std::endl;
         //pout() << "Count: " << obj_count << std::endl;
         
-        double rho_cutoff = 0.05 * m_obj_rho_max;
+        double rho_cutoff = 0.50 * m_obj_rho_max;
         //pout() << "rho95 : " << rho95 << endl;
         //pout() << "rho_now : " << rho_now << endl;
         if (rho_now < rho_cutoff){

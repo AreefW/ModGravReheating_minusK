@@ -283,7 +283,7 @@ void KerrBH4dSTLevel::specificPostTimeStep()
 
     BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
-        if (m_level == min_level) //
+        if (true) //m_level == min_level
         {
             AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
             double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
@@ -344,8 +344,9 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             {
                 constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc max"});
             }
+            if (m_level == min_level){
             constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, rho_max, wcc_max});
-
+            }
         //Custom Extaction
             // set up an interpolator
             // pass the boundary params so that we can use symmetries if
