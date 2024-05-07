@@ -297,10 +297,10 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             //----
             //pout() << "PostTimeStep c_rho_contrast = " << amr_reductions_diag.sum(c_rho_contrast)<< endl;
             double wcc_max = amr_reductions_diag.max(c_weak_coupling_condition_GB);
-            m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol;
+            m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol ;
             double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB))/ phys_vol;
-            double rho_phi_mean = amr_reductions_diag.sum(c_rho_phi);
-            double rho_GB_mean = amr_reductions_diag.sum(c_rho_GB);
+            double rho_phi_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol ;
+            double rho_GB_mean = amr_reductions_diag.sum(c_rho_GB) / phys_vol ;
             double rho_max = amr_reductions_diag.max(c_rho_scaled);
                 pout() << "rho_max : " << rho_max << endl;
             BoxLoops::loop(
@@ -343,7 +343,7 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             constraints_file.remove_duplicate_time_data();
             if (first_step)
             {
-                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc max", "<rho_phi>", "<rho_GB>"});
+                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc_max", "<rho_phi>", "<rho_GB>"});
             }
             if (m_level == min_level){
             constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, rho_max, wcc_max, rho_phi_mean, rho_GB_mean});
