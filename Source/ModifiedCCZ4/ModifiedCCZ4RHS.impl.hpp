@@ -69,6 +69,10 @@ void ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::add_a_and_b_rhs(
     const Vars<Tensor<1, data_t>> &d1, const Diff2Vars<Tensor<2, data_t>> &d2,
     const Vars<data_t> &advec, const Coordinates<data_t> &coords) const
 {
+    // Calculate elements of the decomposed stress energy tensor
+    RhoAndSi<data_t> rho_and_Si =
+        my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
+
     data_t a_of_x = 0.;
     data_t b_of_x = 0.;
 
@@ -158,7 +162,9 @@ void ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::add_a_and_b_rhs(
 
     theory_rhs.lapse += factor_a_of_x * this->m_params.lapse_coeff *
                         pow(theory_vars.lapse, this->m_params.lapse_power) *
-                        (theory_vars.K - 2. * theory_vars.Theta);
+                        ((theory_vars.K - a_K_mean) - 2. * theory_vars.Theta);
+                        // ((theory_vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
+
 
     FOR(i)
     {
@@ -242,8 +248,8 @@ ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::get_full_kappa_times_Sij_TF(
     // solve linear system for the theory fields that require it (e.g. 4dST)
     my_theory.solve_lhs(theory_rhs, theory_vars, d1, d2, advec, coords);
 
-    Tensor<2, data_t> out = theory_rhs.A;
-    FOR(i, j) out[i][j] += -rhs.A[i][j];
+    Tensor<2, data_t> out = -theory_rhs.A;
+    FOR(i, j) out[i][j] += rhs.A[i][j];
     FOR(i, j) out[i][j] /= chi_regularised;
 
     return out;

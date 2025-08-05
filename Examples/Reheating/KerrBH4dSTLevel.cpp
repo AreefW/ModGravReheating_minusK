@@ -92,15 +92,16 @@ void KerrBH4dSTLevel::postRestart()
         BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
 
-        pout() << "Setting K mean on restart at t = " << m_time << " on level "
+        pout() << "Setting K_mean, rho_mean and rho_max on restart at t = " << m_time << " on level "
                << m_level << endl;
 
         AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
             double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
             //m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol;
             m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol;
-            double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB)) / phys_vol;
-            m_bh_amr.m_K_mean = - sqrt(3.0 * rho_mean_all);
+            // double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB)) / phys_vol;
+            m_bh_amr.m_K_mean = - sqrt(3.0 * m_bh_amr.m_rho_mean);
+            m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled) / phys_vol;
 
         // pout() << "Calculated K mean as " << m_bh_amr.m_K_mean
         //        << " at t = " << m_time << " on restart at level " << m_level
@@ -110,9 +111,10 @@ void KerrBH4dSTLevel::postRestart()
          pout() << "rho g2 = " << amr_reductions_diag.sum(c_rho_g2) / phys_vol << endl;
          pout() << "rho g3 = " << amr_reductions_diag.sum(c_rho_g3) / phys_vol << endl;
          pout() << "rho GB = " << amr_reductions_diag.sum(c_rho_GB) / phys_vol << endl;
-         pout() << "rho mean all = " << rho_mean_all << endl;
+         pout() << "rho mean all = " << m_bh_amr.m_K_mean << endl;
          pout() << "phys_vol = " << phys_vol << endl;
          pout() << "K mean = " << m_bh_amr.m_K_mean << endl;
+         pout() << "rho max = " << m_bh_amr.m_rho_max << endl;
     }
 }
 
@@ -143,16 +145,22 @@ void KerrBH4dSTLevel::prePlotLevel()
                    EXCLUDE_GHOST_CELLS);
     int min_level = 0;
     bool calculate_diagnostics = at_level_timestep_multiple(min_level);
+
+    pout() << "preplot before excise rho_max : " << m_bh_amr.m_rho_max << endl;
+    BoxLoops::loop(
+            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean),
+             m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+             disable_simd());
+
     if (/*m_level == min_level &&*/ calculate_diagnostics)
         {
             AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
             //pout() << "PrePlotLevel c_rho_contrast = " << amr_reductions_diag.sum(c_rho_contrast)<< endl;
             //double rho_max = amr_reductions_diag.max(c_rho_scaled);
-        double rho_max = amr_reductions_diag.max(c_rho_scaled);
-                BoxLoops::loop(
-            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, rho_max, m_p.obj_bound_cutoff),
-             m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
-             disable_simd());
+        double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
+
+        m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled) / phys_vol;
+        pout() << "preplot rho_max : " << m_bh_amr.m_rho_max << endl;
         /*if (last_step){
             pout() << "prePlot last step called" << endl;
             double rho_max = amr_reductions_diag.max(c_rho_scaled);
@@ -283,7 +291,16 @@ void KerrBH4dSTLevel::specificPostTimeStep()
 
     BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
-        if (true) //m_level == min_level
+
+    pout() << "before excise rho_max : " << m_bh_amr.m_rho_max << endl;
+    // Add Excision here
+
+    BoxLoops::loop(
+            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean),
+             m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+             disable_simd());
+
+        if (m_level == min_level) //m_level == min_level
         {
             AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
             double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
@@ -298,15 +315,14 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             //pout() << "PostTimeStep c_rho_contrast = " << amr_reductions_diag.sum(c_rho_contrast)<< endl;
             double wcc_max = amr_reductions_diag.max(c_weak_coupling_condition_GB);
             m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol ;
-            double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB))/ phys_vol;
             double rho_phi_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol ;
             double rho_GB_mean = amr_reductions_diag.sum(c_rho_GB) / phys_vol ;
-            double rho_max = amr_reductions_diag.max(c_rho_scaled);
-                pout() << "rho_max : " << rho_max << endl;
-            BoxLoops::loop(
-            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, rho_max, m_p.obj_bound_cutoff),
-             m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
-             disable_simd());
+            m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled) / phys_vol;
+            pout() << "rho_max : " << m_bh_amr.m_rho_max << endl;
+            // BoxLoops::loop(
+            // Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, rho_max, m_p.obj_bound_cutoff, rho_mean_all),
+            //  m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+            //  disable_simd());
 
             /*
             if (last_step){
@@ -324,7 +340,7 @@ void KerrBH4dSTLevel::specificPostTimeStep()
 
             //---- calculate volume and mass of object
             double vol_obj = amr_reductions_diag.sum(c_sqrt_gam_exc);
-            //double mass_obj = amr_reductions_diag.sum(c_rho_exc) * vol_obj;
+            double mass_obj_v = amr_reductions_diag.sum(c_rho_exc) * vol_obj;
             double mass_obj = amr_reductions_diag.sum(c_rho_exc);
             
             //----
@@ -343,11 +359,11 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             constraints_file.remove_duplicate_time_data();
             if (first_step)
             {
-                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc_max", "<rho_phi>", "<rho_GB>"});
+                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc_max", "<rho_phi>", "<rho_GB>", "rho_scaled*V"});
             }
-            if (m_level == min_level){
-            constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, rho_max, wcc_max, rho_phi_mean, rho_GB_mean});
-            }
+            // if (m_level == min_level){
+            constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, m_bh_amr.m_rho_max, wcc_max, rho_phi_mean, rho_GB_mean, mass_obj_v});
+            // }
         //Custom Extaction
             // set up an interpolator
             // pass the boundary params so that we can use symmetries if

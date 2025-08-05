@@ -50,25 +50,25 @@ class CouplingAndPotential
 
         //---- Coupling function f(\phi) = \lambda*\phi        
  
-        dfdphi = m_params.lambda_GB;
+        // dfdphi = m_params.lambda_GB;
         //--- quadratic coupling f(\phi) = \lambda*\phi*\phi   
-        //dfdphi = 2*m_params.lambda_GB*vars.phi;
+        // dfdphi = 2*m_params.lambda_GB*vars.phi;
         //Exponential coupling: f(\phi) = \lambda^{GB} / (2\beta)
         // (1-e^{-\beta\phi^2(1+\kappa\phi^2)}) The first derivative of the GB
         // coupling function
-        /*dfdphi = m_params.lambda_GB *
+        dfdphi = m_params.lambda_GB *
                  exp(-m_params.quadratic_factor * vars.phi * vars.phi *
                      (1. + m_params.quartic_factor * vars.phi * vars.phi)) *
                  vars.phi *
                  (1. + 2. * m_params.quartic_factor * vars.phi * vars.phi);
-        */
+        
         // The second derivative of the GB coupling function
-        d2fdphi2 = 0.;
+        // d2fdphi2 = 0.;
         //--- quadratic coupling f(\phi) = \lambda*\phi*\phi   
-        //d2fdphi2 = 2*m_params.lambda_GB;
+        // d2fdphi2 = 2*m_params.lambda_GB;
         //Exponential coupling: f(\phi) = \lambda^{GB} / (2\beta)
         // (1-e^{-\beta\phi^2(1+\kappa\phi^2)})
-        /*
+        
         d2fdphi2 =
             m_params.lambda_GB *
             exp(-m_params.quadratic_factor * vars.phi * vars.phi *
@@ -77,9 +77,10 @@ class CouplingAndPotential
              2. * m_params.quadratic_factor * vars.phi * vars.phi *
                  (1. + 2. * m_params.quartic_factor * vars.phi * vars.phi) *
                  (1. + 2. * m_params.quartic_factor * vars.phi * vars.phi));
-        */
+        
         // The coupling to the square of the kinetic term
-        g2 = 0.;
+        g2 = 0;
+        //g2 = 1.;
         // The first derivative of the g2 coupling
         dg2dphi = 0.;
         // The potential of the scalar field

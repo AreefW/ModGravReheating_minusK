@@ -18,6 +18,8 @@
  * f(lapse) = -c*lapse^(p-2)
  * and a Gamma-driver shift condition
  **/
+
+// template <class theory_t>
 class ModifiedPunctureGauge
 {
   public:
@@ -41,6 +43,13 @@ class ModifiedPunctureGauge
         double b0 = 0.;  //!< constant value of b(x)
     };
 
+
+    // template <class data_t> struct RhoAndSi
+    // {
+    //   Tensor<1, data_t> Si; //!< S_i = T_ia_n^a
+    //   data_t rho;           //!< rho = T_ab n^a n^b
+    // };
+
   protected:
     params_t m_params;
 
@@ -48,17 +57,23 @@ class ModifiedPunctureGauge
     ModifiedPunctureGauge(const params_t &a_params) : m_params(a_params) {}
 
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t>
+              template <typename> class diff2_vars_t> //, class TheoryType, class TheoryVarsType, template <typename> class coords_t>
     inline void rhs_gauge(vars_t<data_t> &rhs, const vars_t<data_t> &vars,
                           const vars_t<Tensor<1, data_t>> &d1,
                           const diff2_vars_t<Tensor<2, data_t>> &d2,
                           const vars_t<data_t> &advec,
-                          double m_K_mean) const //---- added m_K_mean
+                          double m_K_mean
+                          //,const TheoryType &my_theory,
+                          //const TheoryVarsType &theory_vars,
+                          //const coords_t<data_t> &coords
+                          ) const //---- added m_K_mean
     {
+        // RhoAndSi<data_t> rho_and_Si = my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
+
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
                         pow(vars.lapse, m_params.lapse_power) *
-                        (vars.K - m_K_mean - 2 * vars.Theta); //--- added -m_K_mean 
+                        (vars.K - m_K_mean - 2 * vars.Theta); //--- added -m_K_mean pow(24.0 * M_PI * rho_and_Si.rho, 0.5)
         FOR(i)
         {
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +
@@ -75,6 +90,10 @@ class ModifiedPunctureGauge
         a_of_x = m_params.a0;
         b_of_x = m_params.b0;
     }
+
+  // Class members
+  // theory_t my_theory; //!< The theory object, e.g. 4dST
+
 };
 
 #endif /* MODIFIEDPUNCTUREGAUGE_HPP_ */

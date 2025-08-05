@@ -33,6 +33,7 @@ class HamTaggingCriterion
         const data_t r = coords.get_radius();
 
         data_t criterion = Ham_abs_sum * sqrt_gam * m_dx;
+        // pout() << "Criterion = " << criterion << endl;
         auto regrid = simd_compare_gt(r, m_rad);
 
         // data_t criterion = 0.0;

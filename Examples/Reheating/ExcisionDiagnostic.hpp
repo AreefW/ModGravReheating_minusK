@@ -68,11 +68,12 @@ template <class theory_t> class Excision95Density
     const FourthOrderDerivatives m_deriv;
     const double m_obj_rho_max; //!< Max density
     const double m_obj_bound_cutoff; //!< Define boundary of object as fraction of max density
+    const double m_rho_mean; //!< mean value of energy density
 
   public:
     Excision95Density(const double a_dx, const std::array<double, CH_SPACEDIM> a_center,
-                        const double a_obj_rho_max, const double a_obj_bound_cutoff)
-        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center), m_obj_rho_max(a_obj_rho_max), m_obj_bound_cutoff(a_obj_bound_cutoff)
+                        const double a_obj_rho_max, const double a_obj_bound_cutoff, const double a_rho_mean)
+        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center), m_obj_rho_max(a_obj_rho_max), m_obj_bound_cutoff(a_obj_bound_cutoff), m_rho_mean(a_rho_mean)
     {
     }
 
@@ -119,6 +120,10 @@ template <class theory_t> class Excision95Density
         //   }
           //pout() << coords << std::endl;
           
+        //  Compute Desity contrast
+        auto rho_contrast = (rho_now/m_rho_mean) - 1.0 ;
+        current_cell.store_vars(rho_contrast, c_rho_contrast);
+
         }
         //obj_count ++;
     }
