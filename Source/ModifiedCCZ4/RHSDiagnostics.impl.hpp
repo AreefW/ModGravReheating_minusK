@@ -59,6 +59,10 @@ void RHSDiagnostics<theory_t, gauge_t, deriv_t>::compute(
     WeakCouplingConditions<data_t> weak_coupling_conditions =
         this->my_theory.compute_weak_coupling_conditions(
             theory_rhs, theory_vars, d1, d2, advec, coords);
+    
+    Discriminant<data_t> disc =
+        this->my_theory.compute_discriminant(
+            theory_rhs, theory_vars, d1, d2, advec, coords);
 
     // Write the constraints into the output FArrayBox
     current_cell.store_vars(weak_coupling_conditions.g2,
@@ -67,6 +71,7 @@ void RHSDiagnostics<theory_t, gauge_t, deriv_t>::compute(
                             c_weak_coupling_condition_g3);
     current_cell.store_vars(weak_coupling_conditions.GB,
                             c_weak_coupling_condition_GB);
+    current_cell.store_vars(disc.discriminant, c_Discriminant);
 }
 
 #endif /* RHSDIAGNOSTICS_IMPL_HPP_ */

@@ -57,23 +57,22 @@ class ModifiedPunctureGauge
     ModifiedPunctureGauge(const params_t &a_params) : m_params(a_params) {}
 
     template <class data_t, template <typename> class vars_t,
-              template <typename> class diff2_vars_t> //, class TheoryType, class TheoryVarsType, template <typename> class coords_t>
+              template <typename> class diff2_vars_t>
     inline void rhs_gauge(vars_t<data_t> &rhs, const vars_t<data_t> &vars,
                           const vars_t<Tensor<1, data_t>> &d1,
                           const diff2_vars_t<Tensor<2, data_t>> &d2,
                           const vars_t<data_t> &advec,
                           double m_K_mean
-                          //,const TheoryType &my_theory,
-                          //const TheoryVarsType &theory_vars,
-                          //const coords_t<data_t> &coords
                           ) const //---- added m_K_mean
     {
         // RhoAndSi<data_t> rho_and_Si = my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
+        // auto rho_and_Si = my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
 
-        rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
-                    m_params.lapse_coeff *
-                        pow(vars.lapse, m_params.lapse_power) *
-                        (vars.K - m_K_mean - 2 * vars.Theta); //--- added -m_K_mean pow(24.0 * M_PI * rho_and_Si.rho, 0.5)
+        rhs.lapse = m_params.lapse_advec_coeff * advec.lapse;
+        // rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
+        //             m_params.lapse_coeff *
+        //                 pow(vars.lapse, m_params.lapse_power) *
+        //                 (vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5) - 2 * vars.Theta); //--- added -m_K_mean 
         FOR(i)
         {
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +

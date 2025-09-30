@@ -39,6 +39,8 @@ enum
 
     c_Veff,
 
+    c_Discriminant,
+
     NUM_DIAGNOSTIC_VARS
 };
 
@@ -63,7 +65,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "friction", "gradient", "GB", "potential", "g2",
 
-    "Veff"
+    "Veff", "Discriminant"
     
     };
 }

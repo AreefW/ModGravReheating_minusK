@@ -42,10 +42,11 @@ class FourDerivScalarTensor
 {
   protected:
     //! The local copy of the coupling
-    coupling_and_potential_t my_coupling_and_potential;
+    // coupling_and_potential_t my_coupling_and_potential;
     double m_G_Newton;
 
   public:
+    coupling_and_potential_t my_coupling_and_potential;
     //!  Constructor of class FourDerivScalarTensor, inputs are the theory
     //!  parameters.
     FourDerivScalarTensor(
@@ -202,6 +203,19 @@ class FourDerivScalarTensor
               template <typename> class diff2_vars_t,
               template <typename> class rhs_vars_t>
     WeakCouplingConditions<data_t> compute_weak_coupling_conditions(
+        const rhs_vars_t<data_t> &rhs, //!< the value of the RHS for all vars
+        const vars_t<data_t> &vars,    //!< the value of the variables
+        const vars_t<Tensor<1, data_t>> &d1, //!< the value of the 1st derivs
+        const diff2_vars_t<Tensor<2, data_t>>
+            &d2,                     //!< the value of the 2nd derivs
+        const vars_t<data_t> &advec, //!< the value of the advection terms
+        const Coordinates<data_t> &coords)
+        const; //!< the value of the coordinates
+
+    template <class data_t, template <typename> class vars_t,
+              template <typename> class diff2_vars_t,
+              template <typename> class rhs_vars_t>
+    Discriminant<data_t> compute_discriminant(
         const rhs_vars_t<data_t> &rhs, //!< the value of the RHS for all vars
         const vars_t<data_t> &vars,    //!< the value of the variables
         const vars_t<Tensor<1, data_t>> &d1, //!< the value of the 1st derivs

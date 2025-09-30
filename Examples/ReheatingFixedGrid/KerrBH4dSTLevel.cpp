@@ -21,12 +21,15 @@
 
 //Tagging
 #include "HamTaggingCriterion.hpp"
+// #include "FixedGridsTaggingCriterion.hpp"
 
 // write output
 #include "SmallDataIO.hpp"
 // Custom extraction
 #include "CustomExtraction.hpp"
 #include "ExcisionDiagnostic.hpp"
+#include "ConstraintsExtraction.hpp"
+#include "PointExtraction.hpp"
 
 // Modified Diagnostic
 #include "ModifiedDiagnostics.hpp"
@@ -77,8 +80,7 @@ void KerrBH4dSTLevel::postRestart()
 {
     
     // only want to do this on the first restart and also every restart
-    // if (m_time == 0.0)
-    if (true)
+    if (m_time == 0.0)
     {   
         // data hierarchy should be set up but fill ghosts just to be sure  
         fillAllGhosts();
@@ -152,7 +154,7 @@ void KerrBH4dSTLevel::prePlotLevel()
 
     pout() << "preplot before excise rho_max : " << m_bh_amr.m_rho_max << endl;
     BoxLoops::loop(
-            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean),
+            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center_obj, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean, m_p.obj_r),
              m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
              disable_simd());
 
@@ -254,8 +256,14 @@ void KerrBH4dSTLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                               const FArrayBox &current_state,
                                               const FArrayBox &current_state_diagnostics)
 {
-    BoxLoops::loop(HamTaggingCriterion(m_dx, m_p.center_BS, m_p.rad), current_state_diagnostics,
+    BoxLoops::loop(HamTaggingCriterion(m_dx, m_p.center_obj, m_p.obj_r), current_state_diagnostics,
                    tagging_criterion);
+
+    // std::array<double, CH_SPACEDIM> center_osc = {33.1562, 18.0938, 33.2188}; // center of oscillon
+    // double Lregrid = 64.0;
+    // BoxLoops::loop(
+    //     FixedGridsTaggingCriterion(m_dx, m_level, Lregrid, center_osc),
+    //     current_state, tagging_criterion);
 }
 
 void KerrBH4dSTLevel::specificPostTimeStep()
@@ -304,11 +312,11 @@ void KerrBH4dSTLevel::specificPostTimeStep()
     BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
 
-    pout() << "before excise rho_max : " << m_bh_amr.m_rho_max << endl;
+    // pout() << "before excise rho_max : " << m_bh_amr.m_rho_max << endl;
     // Add Excision here
 
     BoxLoops::loop(
-            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean),
+            Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center_obj, m_bh_amr.m_rho_max, m_p.obj_bound_cutoff, m_bh_amr.m_rho_mean, m_p.obj_r),
              m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
              disable_simd());
 
@@ -330,7 +338,7 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             double rho_phi_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol ;
             double rho_GB_mean = amr_reductions_diag.sum(c_rho_GB) / phys_vol ;
             m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled);
-            pout() << "rho_max : " << m_bh_amr.m_rho_max << endl;
+            // pout() << "rho_max : " << m_bh_amr.m_rho_max << endl;
             // BoxLoops::loop(
             // Excision95Density<FourDerivScalarTensorWithCouplingAndPotential>(m_dx, m_p.center, rho_max, m_p.obj_bound_cutoff, rho_mean_all),
             //  m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
@@ -381,21 +389,31 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             // set up an interpolator
             // pass the boundary params so that we can use symmetries if
             // applicable
-        //    AMRInterpolator<Lagrange<4>> interpolator(
-        //        m_bh_amr, m_p.origin, m_p.dx, m_p.boundary_params,
-        //        m_p.verbosity);
+           AMRInterpolator<Lagrange<4>> interpolator(
+               m_bh_amr, m_p.origin, m_p.dx, m_p.boundary_params,
+               m_p.verbosity);
 
             // this should fill all ghosts including the boundary ones according
             // to the conditions set in params.txt
-        //    interpolator.refresh();
+           interpolator.refresh();
 
             // set up the query and execute it
-        //    int num_points = 1;
+
         //    std::array<double, CH_SPACEDIM> extr_point = {33.25, 18.25, 33.25}; // specified point
-        //    CustomExtraction extraction(c_rho_scaled, num_points, m_p.L, extr_point,
-        //                               m_dt, m_time);
-        //    extraction.execute_query(&interpolator, m_p.data_path + "rho_dat");
+            CustomExtraction rho_extraction(c_rho_scaled, m_p.lineout_num_points, m_p.L, m_p.center_obj,
+                                      m_dt, m_time);
+           rho_extraction.execute_query(&interpolator, m_p.data_path + "rho_lineout");
         //----
+        // this should fill all ghosts including the boundary ones according
+        // to the conditions set in params.txt
+        //     AMRInterpolator<Lagrange<4>> interpolator_p(
+        //     m_bh_amr, m_p.origin, m_p.dx, m_p.boundary_params,
+        //     m_p.verbosity);
+        //    interpolator_p.refresh();
+           int num_points = 1;
+             PointExtraction contrast_extraction(c_rho_contrast, num_points, m_p.L, m_p.center_obj,
+                                      m_dt, m_time);
+           contrast_extraction.execute_query(&interpolator, m_p.data_path + "rho_contrast");
         }
     }
 }

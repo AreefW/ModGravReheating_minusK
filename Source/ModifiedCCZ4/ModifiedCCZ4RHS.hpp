@@ -69,6 +69,12 @@ template <class data_t> struct WeakCouplingConditions
     data_t GB;
 };
 
+// Discriminant
+template <class data_t> struct Discriminant
+{
+    data_t discriminant;
+};
+
 template <class theory_t, class gauge_t = ModifiedPunctureGauge,
           class deriv_t = FourthOrderDerivatives>
 class ModifiedCCZ4RHS : public CCZ4RHS<gauge_t, deriv_t>

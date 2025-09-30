@@ -14,51 +14,51 @@
 #include "VarsTools.hpp"
 
 //! Does excision for outer part of object (collect only part within object)
-template <class theory_t> class ExcisionDiagnostics
-{
-  protected:
-    const double m_dx;                              //!< The grid spacing
-    const std::array<double, CH_SPACEDIM> m_center; //!< The object center
-    const FourthOrderDerivatives m_deriv;
-    const double m_obj_r; //!< Radius of object
+// template <class theory_t> class ExcisionDiagnostics
+// {
+//   protected:
+//     const double m_dx;                              //!< The grid spacing
+//     const std::array<double, CH_SPACEDIM> m_center; //!< The object center
+//     const FourthOrderDerivatives m_deriv;
+//     const double m_obj_r; //!< Radius of object
 
-  public:
-    ExcisionDiagnostics(const double a_dx,
-                        const std::array<double, CH_SPACEDIM> a_center,
-                        const double a_obj_r)
-        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center),
-          m_obj_r(a_obj_r)
-    {
-    }
+//   public:
+//     ExcisionDiagnostics(const double a_dx,
+//                         const std::array<double, CH_SPACEDIM> a_center,
+//                         const double a_obj_r)
+//         : m_dx(a_dx), m_deriv(m_dx), m_center(a_center),
+//           m_obj_r(a_obj_r)
+//     {
+//     }
 
-    void compute(const Cell<double> current_cell) const
-    {
-        const Coordinates<double> coords(current_cell, m_dx, m_center);
+//     void compute(const Cell<double> current_cell) const
+//     {
+//         const Coordinates<double> coords(current_cell, m_dx, m_center);
         
-        if (coords.get_radius() < m_obj_r)
-        {
-          auto rho_in = current_cell.load_vars(c_rho_scaled);
-          current_cell.store_vars(rho_in, c_rho_exc);
+//         if (coords.get_radius() < m_obj_r)
+//         {
+//           auto rho_in = current_cell.load_vars(c_rho_scaled);
+//           current_cell.store_vars(rho_in, c_rho_exc);
 
-          auto chi_in = current_cell.load_vars(c_chi);
-          current_cell.store_vars(chi_in, c_chi_exc);
-            // current_cell.store_vars(0.0, c_rho_GB);
-            // current_cell.store_vars(0.0, c_rho_phi);
-            // current_cell.store_vars(0.0, c_rho_scaled);
-        } // else do nothing
-        else {
-          current_cell.store_vars(0., c_rho_exc);
-          current_cell.store_vars(0., c_chi_exc);
-        }
+//           auto chi_in = current_cell.load_vars(c_chi);
+//           current_cell.store_vars(chi_in, c_chi_exc);
+//             // current_cell.store_vars(0.0, c_rho_GB);
+//             // current_cell.store_vars(0.0, c_rho_phi);
+//             // current_cell.store_vars(0.0, c_rho_scaled);
+//         } // else do nothing
+//         else {
+//           current_cell.store_vars(0., c_rho_exc);
+//           current_cell.store_vars(0., c_chi_exc);
+//         }
 
-      // data_t current_rho;
+//       // data_t current_rho;
 
-      // current_rho = current_cell.load_vars(c_rho_scaled);
-      // if (current_rho > max_rho) {
-      //     current_cell.store_vars(0.0, c_rho_scaled);
-      // }
-    }
-};
+//       // current_rho = current_cell.load_vars(c_rho_scaled);
+//       // if (current_rho > max_rho) {
+//       //     current_cell.store_vars(0.0, c_rho_scaled);
+//       // }
+//     }
+// };
 
 template <class theory_t> class Excision95Density
 {
@@ -89,6 +89,9 @@ template <class theory_t> class Excision95Density
         //pout() << "Rho_now: " << rho_now << std::endl;
         //pout() << "Position of rho_now: " << coords << std::endl;
         //pout() << "Count: " << obj_count << std::endl;
+                //  Compute Desity contrast
+        auto rho_contrast = (rho_now/m_rho_mean) - 1.0 ;
+        current_cell.store_vars(rho_contrast, c_rho_contrast);
         
         double rho_cutoff = m_obj_bound_cutoff * m_obj_rho_max;
         //pout() << "rho95 : " << rho95 << endl;
@@ -119,10 +122,6 @@ template <class theory_t> class Excision95Density
 
         //   }
           //pout() << coords << std::endl;
-          
-        //  Compute Desity contrast
-        auto rho_contrast = (rho_now/m_rho_mean) - 1.0 ;
-        current_cell.store_vars(rho_contrast, c_rho_contrast);
 
         }
         //obj_count ++;

@@ -55,12 +55,16 @@ void ModifiedGravityConstraints<theory_t>::compute(
         my_theory.compute_rho_and_Si(vars, d1, d2, coords);
     SijTFAndS<data_t> Sij_TF_and_S =
         my_theory.compute_Sij_TF_and_S(vars, d1, d2, advec, coords);
-    //AllRhos<data_t> all_rhos = my_theory.compute_all_rhos(vars, d1, d2, coords);
+    AllRhos<data_t> all_rhos = my_theory.compute_all_rhos(vars, d1, d2, coords);
     // Hamiltonian constraint
     if (m_c_Ham >= 0 || m_c_Ham_abs_terms >= 0)
     {
         out.Ham += -16. * M_PI * m_G_Newton * rho_and_Si.rho;
-        out.Ham_abs_terms += 16. * M_PI * m_G_Newton * abs(rho_and_Si.rho);
+        // out.Ham_abs_terms += 16. * M_PI * m_G_Newton * abs(rho_and_Si.rho);
+        out.Ham_abs_terms += 16. * M_PI * m_G_Newton * abs(all_rhos.phi);
+        out.Ham_abs_terms += 16. * M_PI * m_G_Newton * abs(all_rhos.GB);
+
+        // Split into |rho_phi| + |rho_GB|
     }
 
     // Momentum constraints

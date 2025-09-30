@@ -160,10 +160,15 @@ void ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::add_a_and_b_rhs(
         }
     }
 
-    theory_rhs.lapse += factor_a_of_x * this->m_params.lapse_coeff *
+    // theory_rhs.lapse += factor_a_of_x * this->m_params.lapse_coeff *
+    //                     pow(theory_vars.lapse, this->m_params.lapse_power) *
+    //                     // ((theory_vars.K - a_K_mean) - 2. * theory_vars.Theta);
+    //                     ((theory_vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
+        // pout() << "sqrt_rho term : " << pow(24.0 * M_PI * rho_and_Si.rho, 0.5) << endl;
+        // pout() << "K : " << theory_vars.K << endl;
+        theory_rhs.lapse += - 1. / (1. + a_of_x) * this->m_params.lapse_coeff *
                         pow(theory_vars.lapse, this->m_params.lapse_power) *
-                        ((theory_vars.K - a_K_mean) - 2. * theory_vars.Theta);
-                        // ((theory_vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
+                        ((theory_vars.K + pow(24.0 * M_PI * m_G_Newton * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
 
 
     FOR(i)
