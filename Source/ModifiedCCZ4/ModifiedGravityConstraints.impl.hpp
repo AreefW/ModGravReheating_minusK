@@ -77,15 +77,31 @@ void ModifiedGravityConstraints<theory_t>::compute(
                 8. * M_PI * m_G_Newton * abs(rho_and_Si.Si[i]);
         }
     }
+    out.sqrt_gam = pow(vars.chi, -3. / 2.);
+    current_cell.store_vars(out.sqrt_gam, c_sqrt_gam);
+    out.K_scaled = vars.K / pow(vars.chi, 3. / 2.);
+    current_cell.store_vars(out.K_scaled, c_K_scaled);
+    auto A_UU = TensorAlgebra::raise_all(vars.A, h_UU);
+    out.A2 = TensorAlgebra::compute_trace(vars.A, A_UU);
+    current_cell.store_vars(out.A2, c_A2);
+
     out.rho = rho_and_Si.rho;
+    current_cell.store_vars(out.rho, c_rho_total);
+
     //out.rho = all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB;
-    //out.S = Sij_TF_and_S.S;
+    
     //out.rho_scaled = (all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB)/ pow(vars.chi, 3. / 2.);
     out.rho_scaled = rho_and_Si.rho / pow(vars.chi, 3. / 2.);
     current_cell.store_vars(out.rho_scaled, c_rho_scaled);
     //out.S_scaled = Sij_TF_and_S.S / pow(vars.chi, 3. / 2.);
     out.rho_contrast = ((rho_and_Si.rho/m_rho_mean)-1);
     current_cell.store_vars(out.rho_contrast, c_rho_contrast);
+    
+    out.S_scaled = Sij_TF_and_S.S / pow(vars.chi, 3. / 2.);
+    current_cell.store_vars(out.S_scaled, c_S_scaled);
+
+    out.S = Sij_TF_and_S.S;
+    
     // Write the constraints into the output FArrayBox
     store_vars(out, current_cell);
 }

@@ -81,7 +81,7 @@ void ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::add_a_and_b_rhs(
     data_t factor_a_of_x = a_of_x / (1. + a_of_x);
     data_t factor_b_of_x = b_of_x / (1. + b_of_x);
 
-    const data_t chi_regularised = simd_max(1e-6, theory_vars.chi);
+    const data_t chi_regularised = simd_max(1e-30, theory_vars.chi);
     using namespace TensorAlgebra;
     auto h_UU = compute_inverse_sym(theory_vars.h);
     auto chris = compute_christoffel(d1.h, h_UU);
@@ -235,7 +235,7 @@ ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::get_full_kappa_times_Sij_TF(
     const Diff2Vars<Tensor<2, data_t>> &d2, const Vars<data_t> &advec,
     const Coordinates<data_t> &coords) const
 {
-    const data_t chi_regularised = simd_max(theory_vars.chi, 1e-6);
+    const data_t chi_regularised = simd_max(theory_vars.chi, 1e-30);
     // Call CCZ4 RHS - work out GR RHS, no dissipation
     Vars<data_t> rhs;
     this->rhs_equation(rhs, theory_vars, d1, d2, advec);

@@ -22,7 +22,8 @@ class PointExtraction
 {
   private:
     //! Params for extraction
-    const int m_comp;
+    const int m_comp1;
+    const int m_comp2;
     const int m_num_points;
     const double m_L;
     const std::array<double, CH_SPACEDIM> m_center;
@@ -31,10 +32,10 @@ class PointExtraction
 
   public:
     //! The constructor
-    PointExtraction(int a_comp, int a_num_points, double a_L,
+    PointExtraction(int a_comp1, int a_comp2, int a_num_points, double a_L,
                      std::array<double, CH_SPACEDIM> a_center, double a_dt,
                      double a_time)
-        : m_comp(a_comp), m_num_points(a_num_points), m_center(a_center),
+        : m_comp1(a_comp1), m_comp2(a_comp2), m_num_points(a_num_points), m_center(a_center),
           m_L(a_L), m_dt(a_dt), m_time(a_time)
     {
     }
@@ -52,7 +53,8 @@ class PointExtraction
             MayDay::Error("Interpolator has not been initialised.");
         }
         //std::vector<double> interp_var_data(m_num_points);
-        std::vector<double> interp_var(1);
+        std::vector<double> interp_var1(m_num_points);
+        std::vector<double> interp_var2(m_num_points);
         std::vector<double> interp_x(m_num_points);
         std::vector<double> interp_y(m_num_points);
         std::vector<double> interp_z(m_num_points);
@@ -70,15 +72,23 @@ class PointExtraction
         }
 
         // set up the query
-        InterpolationQuery query(m_num_points);
-        query.setCoords(0, interp_x.data())
+        InterpolationQuery query1(m_num_points);
+        query1.setCoords(0, interp_x.data())
             .setCoords(1, interp_y.data())
             .setCoords(2, interp_z.data())
-            .addComp(m_comp, interp_var.data(), Derivative::LOCAL,
+            .addComp(m_comp1, interp_var1.data(), Derivative::LOCAL,
+                     VariableType::diagnostic); // evolution/diagnostic
+
+        InterpolationQuery query2(m_num_points);
+        query2.setCoords(0, interp_x.data())
+            .setCoords(1, interp_y.data())
+            .setCoords(2, interp_z.data())
+            .addComp(m_comp2, interp_var2.data(), Derivative::LOCAL,
                      VariableType::diagnostic); // evolution/diagnostic
 
         // submit the query
-        a_interpolator->interp(query);
+        a_interpolator->interp(query1);
+        a_interpolator->interp(query2);
 
         // now write out
         bool first_step = (m_time == 0.0);
@@ -86,11 +96,21 @@ class PointExtraction
         SmallDataIO output_file(a_file_prefix, m_dt, m_time, restart_time,
                                 SmallDataIO::APPEND, first_step);
 
+        std::vector<std::string> header_line(2);
         if (first_step)
         {
-            output_file.write_header_line({"rho contrast"});
+            header_line[0] = "rho_c";
+            header_line[1] = "contrast_c";
+            output_file.write_header_line(header_line);
         }
-        output_file.write_time_data_line(interp_var);
+
+        for (int idx = 0; idx < m_num_points; ++idx)
+        {
+            std::vector<double> data(2);
+            data[0] = interp_var1[idx];
+            data[1] = interp_var2[idx];
+            output_file.write_time_data_line(data);
+        }
     }
     
 };

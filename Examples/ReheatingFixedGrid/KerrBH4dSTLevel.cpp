@@ -80,48 +80,50 @@ void KerrBH4dSTLevel::postRestart()
 {
     
     // only want to do this on the first restart and also every restart
-    if (m_time == 0.0)
-    {   
-        // data hierarchy should be set up but fill ghosts just to be sure  
-        fillAllGhosts();
-        CouplingAndPotential coupling_and_potential(
-        m_p.coupling_and_potential_params);
-        FourDerivScalarTensorWithCouplingAndPotential fdst(coupling_and_potential,
-                                                       m_p.G_Newton);
-	    ModifiedGravityConstraints<FourDerivScalarTensorWithCouplingAndPotential>
-        constraints(fdst, m_dx, m_p.center, m_p.G_Newton, m_bh_amr.m_rho_mean/*added for rho contrast*/, c_Ham,
-                    Interval(c_Mom, c_Mom),c_Ham_abs_sum);
-        RhoDiagnostics<FourDerivScalarTensorWithCouplingAndPotential>
-        rho_diagnostics(fdst, m_dx, m_p.center);
-        auto compute_pack = make_compute_pack(constraints, rho_diagnostics);
+    // if (m_time == 0.0)
+    // {   
+    //     // data hierarchy should be set up but fill ghosts just to be sure  
+    //     fillAllGhosts();
+    //     CouplingAndPotential coupling_and_potential(
+    //     m_p.coupling_and_potential_params);
+    //     FourDerivScalarTensorWithCouplingAndPotential fdst(coupling_and_potential,
+    //                                                    m_p.G_Newton);
+	//     ModifiedGravityConstraints<FourDerivScalarTensorWithCouplingAndPotential>
+    //     constraints(fdst, m_dx, m_p.center, m_p.G_Newton, m_bh_amr.m_rho_mean/*added for rho contrast*/, c_Ham,
+    //                 Interval(c_Mom, c_Mom),c_Ham_abs_sum);
+    //     RhoDiagnostics<FourDerivScalarTensorWithCouplingAndPotential>
+    //     rho_diagnostics(fdst, m_dx, m_p.center);
+    //     auto compute_pack = make_compute_pack(constraints, rho_diagnostics);
 
-        BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
-                   EXCLUDE_GHOST_CELLS);
+    //     BoxLoops::loop(compute_pack, m_state_new, m_state_diagnostics,
+    //                EXCLUDE_GHOST_CELLS);
 
-        pout() << "Setting K_mean, rho_mean and rho_max on restart at t = " << m_time << " on level "
-               << m_level << endl;
+    //     pout() << "Setting K_mean, rho_mean and rho_max on restart at t = " << m_time << " on level "
+    //            << m_level << endl;
 
-        AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
-            double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
-            //m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol;
-            m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol;
-            // double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB)) / phys_vol;
-            m_bh_amr.m_K_mean = - sqrt(3.0 * m_bh_amr.m_rho_mean);
-            m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled);
+    //     AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_bh_amr);
+    //         double phys_vol = amr_reductions_diag.sum(c_sqrt_gam);
+    //         //m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_phi) / phys_vol;
+    //         m_bh_amr.m_rho_mean = amr_reductions_diag.sum(c_rho_scaled) / phys_vol;
+    //         // double rho_mean_all = (amr_reductions_diag.sum(c_rho_phi) + amr_reductions_diag.sum(c_rho_g2) + amr_reductions_diag.sum(c_rho_g3) + amr_reductions_diag.sum(c_rho_GB)) / phys_vol;
+    //         // m_bh_amr.m_K_mean = - sqrt(3.0 * m_bh_amr.m_rho_mean);
+    //         m_bh_amr.m_K_mean = amr_reductions_diag.sum(c_K_scaled) / phys_vol;
+    //         m_bh_amr.m_rho_max = amr_reductions_diag.max(c_rho_scaled);
+    //         m_bh_amr.m_S_mean = amr_reductions_diag.sum(c_S_scaled) / phys_vol;
 
-        // pout() << "Calculated K mean as " << m_bh_amr.m_K_mean
-        //        << " at t = " << m_time << " on restart at level " << m_level
-        //        << endl;
-        // pout() << "PostRestart c_rho_contrast = " << amr_reductions_diag.sum(c_rho_contrast) << endl;
-         pout() << "rho phi = " << amr_reductions_diag.sum(c_rho_phi) / phys_vol << endl;
-         pout() << "rho g2 = " << amr_reductions_diag.sum(c_rho_g2) / phys_vol << endl;
-         pout() << "rho g3 = " << amr_reductions_diag.sum(c_rho_g3) / phys_vol << endl;
-         pout() << "rho GB = " << amr_reductions_diag.sum(c_rho_GB) / phys_vol << endl;
-         pout() << "rho mean all = " << m_bh_amr.m_K_mean << endl;
-         pout() << "phys_vol = " << phys_vol << endl;
-         pout() << "K mean = " << m_bh_amr.m_K_mean << endl;
-         pout() << "rho max = " << m_bh_amr.m_rho_max << endl;
-    }
+    //     // pout() << "Calculated K mean as " << m_bh_amr.m_K_mean
+    //     //        << " at t = " << m_time << " on restart at level " << m_level
+    //     //        << endl;
+    //     // pout() << "PostRestart c_rho_contrast = " << amr_reductions_diag.sum(c_rho_contrast) << endl;
+    //      pout() << "rho phi = " << amr_reductions_diag.sum(c_rho_phi) / phys_vol << endl;
+    //      pout() << "rho g2 = " << amr_reductions_diag.sum(c_rho_g2) / phys_vol << endl;
+    //      pout() << "rho g3 = " << amr_reductions_diag.sum(c_rho_g3) / phys_vol << endl;
+    //      pout() << "rho GB = " << amr_reductions_diag.sum(c_rho_GB) / phys_vol << endl;
+    //      pout() << "rho mean all = " << m_bh_amr.m_rho_mean << endl;
+    //      pout() << "phys_vol = " << phys_vol << endl;
+    //      pout() << "K mean = " << m_bh_amr.m_K_mean << endl;
+    //      pout() << "rho max = " << m_bh_amr.m_rho_max << endl;
+    // }
 }
 
 #ifdef CH_USE_HDF5
@@ -260,9 +262,9 @@ void KerrBH4dSTLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                    tagging_criterion);
 
     // std::array<double, CH_SPACEDIM> center_osc = {33.1562, 18.0938, 33.2188}; // center of oscillon
-    // double Lregrid = 64.0;
+    // double Lregrid = 32.0;
     // BoxLoops::loop(
-    //     FixedGridsTaggingCriterion(m_dx, m_level, Lregrid, center_osc),
+    //     FixedGridsTaggingCriterion(m_dx, m_level, Lregrid, m_p.center_obj),
     //     current_state, tagging_criterion);
 }
 
@@ -355,8 +357,11 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             }
             */
         
-           //m_bh_amr.m_S_mean = amr_reductions_diag.sum(c_S_scaled) / phys_vol;
+            m_bh_amr.m_S_mean = amr_reductions_diag.sum(c_S_scaled) / phys_vol;
             m_bh_amr.m_K_mean = - sqrt(3.0 * m_bh_amr.m_rho_mean);
+
+            // BoxLoops::loop(SetValue(m_bh_amr.m_K_mean, Interval(c_K, c_K)),
+            //            m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 
             //---- calculate volume and mass of object
             double vol_obj = amr_reductions_diag.sum(c_sqrt_gam_exc);
@@ -411,7 +416,7 @@ void KerrBH4dSTLevel::specificPostTimeStep()
         //     m_p.verbosity);
         //    interpolator_p.refresh();
            int num_points = 1;
-             PointExtraction contrast_extraction(c_rho_contrast, num_points, m_p.L, m_p.center_obj,
+             PointExtraction contrast_extraction(c_rho_scaled, c_rho_contrast, num_points, m_p.L, m_p.center_obj,
                                       m_dt, m_time);
            contrast_extraction.execute_query(&interpolator, m_p.data_path + "rho_contrast");
         }
