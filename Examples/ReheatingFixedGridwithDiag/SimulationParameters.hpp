@@ -46,7 +46,6 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
         // pp.load("rad", rad, L);
         pp.load("obj_r", obj_r, 1.);
         pp.load("center_obj", center_obj, center);
-        pp.load("background_point", background_point, center);
         
         // Lineout params
         pp.load("lineout_num_points", lineout_num_points, 10);
@@ -67,7 +66,6 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
 
         // Oscillon
         pp.load("obj_bound_cutoff", obj_bound_cutoff,0.95);
-        pp.load("t_change_tagging", t_change_tagging,100000.0);
 
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * kerr_params.mass);
@@ -96,11 +94,9 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
     double G_Newton;
     double obj_r;
     double obj_bound_cutoff;
-    double t_change_tagging;
     int lineout_num_points;
     // std::array<double, CH_SPACEDIM> center_BS;
     std::array<double, CH_SPACEDIM> center_obj;
-    std::array<double, CH_SPACEDIM> background_point;
     InitialScalarData::params_t initial_params;
     CouplingAndPotential::params_t coupling_and_potential_params;
     KerrBH::params_t kerr_params;

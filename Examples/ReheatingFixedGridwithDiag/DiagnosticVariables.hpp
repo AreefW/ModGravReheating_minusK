@@ -19,8 +19,6 @@ enum
     c_rho_GB,
     c_rho_total,
     c_rho_exc,
-    c_rho_phi_scaled,
-    c_rho_GB_scaled,
 
     c_sqrt_gam, // sqrt(gamma)=pow(chi,-3/2) volume factor of spatial metric
     c_rho_scaled,
@@ -59,10 +57,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     
     "rho_total",
     
-    "rho_exc",
-
-    "rho_phi_scaled", "rho_GB_scaled",
-     
+    "rho_exc", 
     "sqrt_gam", "rho_scaled", "S_scaled", "K_scaled", "A2", 
     "rho_contrast", "sqrt_gam_exc",
     

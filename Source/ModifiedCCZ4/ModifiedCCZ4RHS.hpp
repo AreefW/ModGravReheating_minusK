@@ -194,7 +194,7 @@ class ModifiedCCZ4RHS : public CCZ4RHS<gauge_t, deriv_t>
     double m_G_Newton;
     //---added
     double a_rho_mean;
-    double a_K_mean;
+    double m_K_mean;
     //double a_S_mean;
 };
 

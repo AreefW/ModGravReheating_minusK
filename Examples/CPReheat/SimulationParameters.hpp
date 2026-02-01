@@ -46,7 +46,6 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
         // pp.load("rad", rad, L);
         pp.load("obj_r", obj_r, 1.);
         pp.load("center_obj", center_obj, center);
-        pp.load("background_point", background_point, center);
         
         // Lineout params
         pp.load("lineout_num_points", lineout_num_points, 10);
@@ -100,7 +99,6 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
     int lineout_num_points;
     // std::array<double, CH_SPACEDIM> center_BS;
     std::array<double, CH_SPACEDIM> center_obj;
-    std::array<double, CH_SPACEDIM> background_point;
     InitialScalarData::params_t initial_params;
     CouplingAndPotential::params_t coupling_and_potential_params;
     KerrBH::params_t kerr_params;

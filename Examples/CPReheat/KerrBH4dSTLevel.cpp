@@ -31,8 +31,6 @@
 #include "ConstraintsExtraction.hpp"
 #include "PointExtraction.hpp"
 
-#include "PointExtractionEvo.hpp"
-
 // Modified Diagnostic
 #include "ModifiedDiagnostics.hpp"
 
@@ -378,10 +376,6 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             double vol_obj = amr_reductions_diag.sum(c_sqrt_gam_exc);
             double mass_obj_v = amr_reductions_diag.sum(c_rho_exc) * vol_obj;
             double mass_obj = amr_reductions_diag.sum(c_rho_exc);
-            double rho_max_phi = amr_reductions_diag.max(c_rho_phi);
-            double rho_max_phi_scaled = amr_reductions_diag.max(c_rho_phi_scaled);
-            double rho_max_GB = amr_reductions_diag.max(c_rho_GB);
-            double rho_max_GB_scaled = amr_reductions_diag.max(c_rho_GB_scaled);
             
             //----
 	        AMRReductions<VariableType::evolution> amr_reductions_evo(m_bh_amr);
@@ -400,10 +394,10 @@ void KerrBH4dSTLevel::specificPostTimeStep()
             constraints_file.remove_duplicate_time_data();
             if (first_step)
             {
-                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc_max", "<rho_phi>", "<rho_GB>", "ln(a)", "rho_c", "rho_total_mean", "delta_c", "rho_max_phi", "rho_max_phi_scaled", "rho_max_GB", "rho_max_GB_scaled"});
+                constraints_file.write_header_line({"<chi>", "<rho>", "L2_Ham", "L2_Mom", "Vol_osc", "M_osc", "rho_max", "wcc_max", "<rho_phi>", "<rho_GB>", "ln(a)", "rho_c", "rho_total_mean", "delta_c"});
             }
             // if (m_level == min_level){
-            constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, m_bh_amr.m_rho_max, wcc_max, rho_phi_mean, rho_GB_mean, lna, rho_c, rho_total_mean, delta_c, rho_max_phi, rho_max_phi_scaled, rho_max_GB, rho_max_GB_scaled});
+            constraints_file.write_time_data_line({chi_mean, m_bh_amr.m_rho_mean, L2_Ham, L2_Mom, vol_obj, mass_obj, m_bh_amr.m_rho_max, wcc_max, rho_phi_mean, rho_GB_mean, lna, rho_c, rho_total_mean, delta_c});
             // }
         //Custom Extaction
             // set up an interpolator
@@ -431,31 +425,9 @@ void KerrBH4dSTLevel::specificPostTimeStep()
         //     m_p.verbosity);
         //    interpolator_p.refresh();
            int num_points = 1;
-           
-            PointExtraction contrast_extraction(c_rho_scaled, c_rho_contrast, num_points, m_p.L, m_p.center_obj,
+             PointExtraction contrast_extraction(c_rho_scaled, c_rho_contrast, num_points, m_p.L, m_p.center_obj,
                                       m_dt, m_time);
            contrast_extraction.execute_query(&interpolator, m_p.data_path + "rho_contrast");
-
-
-        // only on rank zero write out the result
-        if (procID() == 0)
-        {
-            pout() << "Extract phi at centre obj: " << m_p.center_obj[0] << ", " << m_p.center_obj[1] << ", " << m_p.center_obj[2] << endl;
-        }
-        
-            PointExtrEvo phi_c_extraction(c_phi, c_Veff, num_points, m_p.L, m_p.center_obj,
-                                      m_dt, m_time);
-           phi_c_extraction.execute_query(&interpolator, m_p.data_path + "phi_c");
-
-        if (procID() == 0)
-        {
-            pout() << "Extract phi at backgroud: " << m_p.background_point[0] << ", " << m_p.background_point[1] << ", " << m_p.background_point[2] << endl;
-        }
-            PointExtrEvo phi_bg_extraction(c_phi, c_Veff, num_points, m_p.L, m_p.background_point,
-                                      m_dt, m_time);
-           phi_bg_extraction.execute_query(&interpolator, m_p.data_path + "phi_bg");
-
-
         }
     }
 }

@@ -67,12 +67,13 @@ class ModifiedPunctureGauge
     {
         // RhoAndSi<data_t> rho_and_Si = my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
         // auto rho_and_Si = my_theory.compute_rho_and_Si(theory_vars, d1, d2, coords);
-
-        rhs.lapse = m_params.lapse_advec_coeff * advec.lapse;
-        // rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
-        //             m_params.lapse_coeff *
-        //                 pow(vars.lapse, m_params.lapse_power) *
-        //                 (vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5) - 2 * vars.Theta); //--- added -m_K_mean 
+        // pout() << "gr gauge m_K_mean = " << m_K_mean << endl;
+        // rhs.lapse = m_params.lapse_advec_coeff * advec.lapse;
+        rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
+                    m_params.lapse_coeff *
+                        pow(vars.lapse, m_params.lapse_power) *
+                        // (vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5) - 2 * vars.Theta); //--- added -m_K_mean 
+                        ((vars.K - m_K_mean) - 2 * vars.Theta);
         FOR(i)
         {
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +

@@ -34,12 +34,12 @@ class HamTaggingCriterion
 
         data_t criterion = Ham_abs_sum * sqrt_gam * m_dx;
         // pout() << "Criterion = " << criterion << endl;
-        // auto regrid = simd_compare_gt(r, m_rad);
+        auto regrid = simd_compare_gt(r, m_rad);
 
         // data_t criterion = 0.0;
-        auto regrid = simd_compare_lt(r, m_rad);
+        // auto regrid = simd_compare_lt(r, m_rad);
 
-        criterion = simd_conditional(regrid, criterion, 0.0);
+        criterion = simd_conditional(regrid, 0.0, criterion);
 
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);

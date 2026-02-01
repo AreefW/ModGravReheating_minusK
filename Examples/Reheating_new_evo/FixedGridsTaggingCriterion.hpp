@@ -46,7 +46,7 @@ class FixedGridsTaggingCriterion
         double ratio = 0.0;
 
         if (m_level < m_max_level){
-          ratio = 1.0 + 0.125 * (m_max_level - m_level);
+          ratio = 1.0 + 0.2 * (m_max_level - m_level);
         }
         else {
           ratio = 1.0;

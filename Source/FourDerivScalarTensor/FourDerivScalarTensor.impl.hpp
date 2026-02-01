@@ -1219,19 +1219,25 @@ WeakCouplingConditions<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
         CCZ4Geometry::compute_ricci_Z(vars, d1, d2, h_UU, chris, {0., 0., 0.});
 
     data_t s = sqrt(sqrt(nabla2_phi * nabla2_phi));
+    // pout() << "s = " << s << endl;
     data_t l = sqrt(nabla_phi * nabla_phi);
+    // pout() << "l = " << l << endl;
     data_t Lm1 = simd_max(l, s);
     FOR(i, j)
     {
         data_t r = sqrt(sqrt(ricci0.LL[i][j] * ricci0.LL[i][j]));
+        // pout() << "r = " << r << endl;
         Lm1 = simd_max(Lm1, r);
     }
     data_t abs_root_V = sqrt(sqrt(V_of_phi * V_of_phi));
+    // pout() << "abs_root_V = " << abs_root_V << endl;
     Lm1 = simd_max(Lm1, abs_root_V);
     RGB = sqrt(RGB * RGB);
+    // pout() << "RGB = " << RGB << endl;
     Lm1 = simd_max(Lm1, sqrt(sqrt(RGB)));
     //out.GB = Lm1 * Lm1 * dfdphi;
     out.GB = Lm1 * Lm1 * sqrt(dfdphi*dfdphi);
+    // pout() << "sqrt(dfdphi*dfdphi) = " << sqrt(dfdphi*dfdphi) << endl;
 
     data_t weak_g2 = vars.Pi * vars.Pi;
     data_t dphi2 = 0.;

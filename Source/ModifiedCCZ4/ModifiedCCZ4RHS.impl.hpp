@@ -20,7 +20,7 @@ ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::ModifiedCCZ4RHS(
     : CCZ4RHS<gauge_t, deriv_t>(a_params, a_dx, a_sigma, a_K_mean, CCZ4RHS<>::USE_CCZ4,
                                 0.0 /*No cosmological constant*/),
       my_theory(a_theory), my_gauge(a_gauge), m_center(a_center),
-      m_G_Newton(a_G_Newton)
+      m_G_Newton(a_G_Newton), m_K_mean(a_K_mean)
 {
 }
 
@@ -159,16 +159,16 @@ void ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>::add_a_and_b_rhs(
             }
         }
     }
-
-    // theory_rhs.lapse += factor_a_of_x * this->m_params.lapse_coeff *
-    //                     pow(theory_vars.lapse, this->m_params.lapse_power) *
-    //                     // ((theory_vars.K - a_K_mean) - 2. * theory_vars.Theta);
+    // pout() << "mg gauge m_K_mean = " << m_K_mean << endl;
+    theory_rhs.lapse += factor_a_of_x * this->m_params.lapse_coeff *
+                        pow(theory_vars.lapse, this->m_params.lapse_power) *
+                        ((theory_vars.K - m_K_mean) - 2. * theory_vars.Theta);
     //                     ((theory_vars.K - pow(24.0 * M_PI * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
         // pout() << "sqrt_rho term : " << pow(24.0 * M_PI * rho_and_Si.rho, 0.5) << endl;
         // pout() << "K : " << theory_vars.K << endl;
-        theory_rhs.lapse += - 1. / (1. + a_of_x) * this->m_params.lapse_coeff *
-                        pow(theory_vars.lapse, this->m_params.lapse_power) *
-                        ((theory_vars.K + pow(24.0 * M_PI * m_G_Newton * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
+        // theory_rhs.lapse += - 1. / (1. + a_of_x) * this->m_params.lapse_coeff *
+        //                 pow(theory_vars.lapse, this->m_params.lapse_power) *
+        //                 ((theory_vars.K + pow(24.0 * M_PI * m_G_Newton * rho_and_Si.rho, 0.5)) - 2. * theory_vars.Theta);
 
 
     FOR(i)

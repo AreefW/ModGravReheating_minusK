@@ -34,13 +34,10 @@ void RhoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
     AllRhos<data_t> all_rhos = my_theory.compute_all_rhos(vars, d1, d2, coords);
 
     // Write the constraints into the output FArrayBox
-    current_cell.store_vars(all_rhos.phi / pow(vars.chi, 3. / 2.), c_rho_phi_scaled);
+    current_cell.store_vars(all_rhos.phi / pow(vars.chi, 3. / 2.), c_rho_phi);
     current_cell.store_vars(all_rhos.g2 / pow(vars.chi, 3. / 2.), c_rho_g2);
     current_cell.store_vars(all_rhos.g3 / pow(vars.chi, 3. / 2.), c_rho_g3);
-    current_cell.store_vars(all_rhos.GB / pow(vars.chi, 3. / 2.), c_rho_GB_scaled);
-
-    current_cell.store_vars(all_rhos.phi, c_rho_phi);
-    current_cell.store_vars(all_rhos.GB, c_rho_GB);
+    current_cell.store_vars(all_rhos.GB / pow(vars.chi, 3. / 2.), c_rho_GB);
 }
 
 #endif /* RHODIAGNOSTICS_IMPL_HPP_ */
