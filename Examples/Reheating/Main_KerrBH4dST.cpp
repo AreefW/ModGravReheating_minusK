@@ -13,9 +13,9 @@
 #include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
 #include "GRParmParse.hpp"
+#include "MultiLevelTask.hpp"
 #include "SetupFunctions.hpp"
 #include "SimulationParameters.hpp"
-#include "MultiLevelTask.hpp"
 
 // Problem specific includes:
 #include "KerrBH4dSTLevel.hpp"
@@ -75,15 +75,15 @@ int runGRChombo(int argc, char *argv[])
 
     std::chrono::time_point<Clock> start_time = Clock::now();
 
-// Add a scheduler to call specificPostTimeStep on every AMRLevel at t=0
-    auto task = [](GRAMRLevel *level) 
+    // Add a scheduler to call specificPostTimeStep on every AMRLevel at t=0
+    auto task = [](GRAMRLevel *level)
     {
-     if (level->time() == 0.)
-              level->specificPostTimeStep();
-                                    };
+        if (level->time() == 0.)
+            level->specificPostTimeStep();
+    };
     MultiLevelTaskPtr<> call_task(task);
     call_task.execute(bh_amr);
-//---
+    //---
 
     // Engage! Run the evolution
     bh_amr.run(sim_params.stop_time, sim_params.max_steps);

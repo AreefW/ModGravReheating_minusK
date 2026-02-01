@@ -24,7 +24,8 @@ class FixedGridsTaggingCriterion
     FixedGridsTaggingCriterion(const double dx, const int a_level,
                                const int a_max_level, const double a_L,
                                const std::array<double, CH_SPACEDIM> a_center)
-        : m_dx(dx), m_L(a_L), m_level(a_level), m_max_level(a_max_level), m_center(a_center){};
+        : m_dx(dx), m_L(a_L), m_level(a_level), m_max_level(a_max_level),
+          m_center(a_center){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -42,14 +43,16 @@ class FixedGridsTaggingCriterion
         // else {
         //   ratio = 0.;
         // }
-        
+
         double ratio = 0.0;
 
-        if (m_level < m_max_level){
-          ratio = 1.0 + 0.2 * (m_max_level - m_level);
+        if (m_level < m_max_level)
+        {
+            ratio = 1.0 + 0.2 * (m_max_level - m_level);
         }
-        else {
-          ratio = 1.0;
+        else
+        {
+            ratio = 1.0;
         }
         // if (m_level == 0){
         //   ratio = 1.4;
@@ -59,7 +62,7 @@ class FixedGridsTaggingCriterion
         // }
         // else if (m_level == 2){
         //   ratio = 1.;
-        // } 
+        // }
         // else {
         //   ratio = 0.;
         // }
@@ -67,22 +70,26 @@ class FixedGridsTaggingCriterion
         // const data_t max_abs_xy = simd_max(abs(coords.x), abs(coords.y));
         // const data_t max_abs_xyz = simd_max(max_abs_xy, abs(coords.z));
         // auto in_box_x = simd_compare_lt(abs(coords.x - m_center[0]), m_L);
-        // auto abs_xy = simd_compare_lt(in_box_x, abs(coords.x - m_center[0]), m_L);
-        // auto in_box_y = simd_compare_lt(abs(coords.y) - abs(coords.x), m_L);
-        // auto x_distance = simd_conditional(inbox_x, abs(coords.x - m_center[0]), );
-        // auto inbox_x = simd_compare_lt(coords.x - m_center[0], m_L);
-        // auto inbox_y = simd_compare_lt(coords.y - m_center[1], m_L);
-        // auto inbox_z = simd_compare_lt(coords.z - m_center[2], m_L);
-        // auto inbox = simd_compare_lt(abs(coords.x - m_center[0]) + abs(coords.y - m_center[1]) + abs(coords.z - m_center[2]), (3 * m_L * ratio));
-        // auto regrid = inbox_x * inbox_y * inbox_z;
+        // auto abs_xy = simd_compare_lt(in_box_x, abs(coords.x - m_center[0]),
+        // m_L); auto in_box_y = simd_compare_lt(abs(coords.y) - abs(coords.x),
+        // m_L); auto x_distance = simd_conditional(inbox_x, abs(coords.x -
+        // m_center[0]), ); auto inbox_x = simd_compare_lt(coords.x -
+        // m_center[0], m_L); auto inbox_y = simd_compare_lt(coords.y -
+        // m_center[1], m_L); auto inbox_z = simd_compare_lt(coords.z -
+        // m_center[2], m_L); auto inbox = simd_compare_lt(abs(coords.x -
+        // m_center[0]) + abs(coords.y - m_center[1]) + abs(coords.z -
+        // m_center[2]), (3 * m_L * ratio)); auto regrid = inbox_x * inbox_y *
+        // inbox_z;
 
         // const data_t r = coords.get_radius();
         // auto regrid = simd_compare_lt(r, m_L * ratio);
-        // pout() << "abs_x = " << coords.x << "-" << m_center[0] << " = " << abs(coords.x - m_center[0]) << endl;
+        // pout() << "abs_x = " << coords.x << "-" << m_center[0] << " = " <<
+        // abs(coords.x - m_center[0]) << endl;
 
-        // const data_t max_abs_xy = simd_max(abs(coords.x - m_center[0]), abs(coords.y - m_center[1]));
-        // const data_t max_abs_xyz = simd_max(max_abs_xy, abs(coords.z - m_center[2]));
-        // auto regrid = simd_compare_lt(max_abs_xyz, m_L * ratio);
+        // const data_t max_abs_xy = simd_max(abs(coords.x - m_center[0]),
+        // abs(coords.y - m_center[1])); const data_t max_abs_xyz =
+        // simd_max(max_abs_xy, abs(coords.z - m_center[2])); auto regrid =
+        // simd_compare_lt(max_abs_xyz, m_L * ratio);
 
         const data_t max_abs_xy = simd_max(abs(coords.x), abs(coords.y));
         const data_t max_abs_xyz = simd_max(max_abs_xy, abs(coords.z));

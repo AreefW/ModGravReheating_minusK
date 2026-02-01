@@ -424,7 +424,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_Sij_TF_and_S(
     {
         RGB += 8. * Mij_TF_UU_over_chi[i][j] * Fij[i][j] +
                16. / 3. * vars.chi * h_UU[i][j] * d1.K[i] *
-                (Ni[j] + 1. / 3. * d1.K[j]) +
+                   (Ni[j] + 1. / 3. * d1.K[j]) +
                8. * vars.chi * h_UU[i][j] * Ni[i] * Ni[j];
         FOR(k, l, m, n)
         RGB -= 8. * vars.chi * h_UU[i][l] * h_UU[j][m] * h_UU[k][n] *
@@ -1235,8 +1235,8 @@ WeakCouplingConditions<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
     RGB = sqrt(RGB * RGB);
     // pout() << "RGB = " << RGB << endl;
     Lm1 = simd_max(Lm1, sqrt(sqrt(RGB)));
-    //out.GB = Lm1 * Lm1 * dfdphi;
-    out.GB = Lm1 * Lm1 * sqrt(dfdphi*dfdphi);
+    // out.GB = Lm1 * Lm1 * dfdphi;
+    out.GB = Lm1 * Lm1 * sqrt(dfdphi * dfdphi);
     // pout() << "sqrt(dfdphi*dfdphi) = " << sqrt(dfdphi*dfdphi) << endl;
 
     data_t weak_g2 = vars.Pi * vars.Pi;
@@ -1255,24 +1255,23 @@ template <class coupling_and_potential_t>
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t,
           template <typename> class rhs_vars_t>
-Discriminant<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
-    compute_discriminant(const rhs_vars_t<data_t> &rhs_vars,
-                                     const vars_t<data_t> &vars,
-                                     const vars_t<Tensor<1, data_t>> &d1,
-                                     const diff2_vars_t<Tensor<2, data_t>> &d2,
-                                     const vars_t<data_t> &advec,
-                                     const Coordinates<data_t> &coords) const
+Discriminant<data_t>
+FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
+    const rhs_vars_t<data_t> &rhs_vars, const vars_t<data_t> &vars,
+    const vars_t<Tensor<1, data_t>> &d1,
+    const diff2_vars_t<Tensor<2, data_t>> &d2, const vars_t<data_t> &advec,
+    const Coordinates<data_t> &coords) const
 {
     Discriminant<data_t> out;
 
-   using namespace TensorAlgebra;
-   const auto h_UU = compute_inverse_sym(vars.h);
-   const auto chris = compute_christoffel(d1.h, h_UU);
+    using namespace TensorAlgebra;
+    const auto h_UU = compute_inverse_sym(vars.h);
+    const auto chris = compute_christoffel(d1.h, h_UU);
 
-   const data_t chi_regularised = simd_max(1e-30, vars.chi);
-   const data_t lapse_regularised = simd_max(1e-30, vars.lapse);
+    const data_t chi_regularised = simd_max(1e-30, vars.chi);
+    const data_t lapse_regularised = simd_max(1e-30, vars.lapse);
 
-   // set the potential values
+    // set the potential values
     data_t dfdphi = 0.;
     data_t d2fdphi2 = 0.;
     data_t g2 = 0.;
@@ -1296,79 +1295,86 @@ Discriminant<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
 
     Tensor<1, data_t> Omega_i_U = raise_all(Omega_i, h_UU);
 
-    data_t Omega_nn = 4. * dfdphi / lapse_regularised * (rhs_vars.Pi - advec.Pi -
-        vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
-	d2fdphi2 * vars.Pi * vars.Pi;
+    data_t Omega_nn =
+        4. * dfdphi / lapse_regularised *
+            (rhs_vars.Pi - advec.Pi -
+             vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
+        d2fdphi2 * vars.Pi * vars.Pi;
 
     FOR(i, j) Omega_ij_UU[i][j] *= vars.chi;
     Tensor<2, data_t> eff_met = (h_UU - Omega_ij_UU) * (1. + Omega_nn);
-    FOR(i,j) eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
-		Omega_i_U[i] * vars.shift[j] / lapse_regularised -
-		Omega_i_U[j] * vars.shift[i] / lapse_regularised -
-		Omega_nn / chi_regularised * vars.shift[i] / lapse_regularised *
-					vars.shift[j] / lapse_regularised;
+    FOR(i, j)
+    eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
+                     Omega_i_U[i] * vars.shift[j] / lapse_regularised -
+                     Omega_i_U[j] * vars.shift[i] / lapse_regularised -
+                     Omega_nn / chi_regularised * vars.shift[i] /
+                         lapse_regularised * vars.shift[j] / lapse_regularised;
     out.discriminant = compute_determinant_sym(eff_met);
 
     // recalculate Omega_\mu\nu
-//    Tensor<2, data_t> covdtilde2phi;
-//    Tensor<2, data_t> covd2phi;
-//    data_t dphi_dot_dchi = compute_dot_product(d1.phi, d1.chi, h_UU);
-//    FOR(k, l)
-//    {
-//         covdtilde2phi[k][l] = d2.phi[k][l];
-//         FOR1(m) { covdtilde2phi[k][l] -= chris.ULL[m][k][l] * d1.phi[m]; }
-//         covd2phi[k][l] = covdtilde2phi[k][l] +
-//                          0.5 *
-//                              (d1.phi[k] * d1.chi[l] + d1.chi[k] * d1.phi[l] -
-//                               vars.h[k][l] * dphi_dot_dchi) /
-//                              chi_regularised;
-//     }
+    //    Tensor<2, data_t> covdtilde2phi;
+    //    Tensor<2, data_t> covd2phi;
+    //    data_t dphi_dot_dchi = compute_dot_product(d1.phi, d1.chi, h_UU);
+    //    FOR(k, l)
+    //    {
+    //         covdtilde2phi[k][l] = d2.phi[k][l];
+    //         FOR1(m) { covdtilde2phi[k][l] -= chris.ULL[m][k][l] * d1.phi[m];
+    //         } covd2phi[k][l] = covdtilde2phi[k][l] +
+    //                          0.5 *
+    //                              (d1.phi[k] * d1.chi[l] + d1.chi[k] *
+    //                              d1.phi[l] -
+    //                               vars.h[k][l] * dphi_dot_dchi) /
+    //                              chi_regularised;
+    //     }
 
-//     // decomposition of C_{ab} = \nabla_a\nabla_b\phi
-//     Tensor<2, data_t> Cij; // C_{ij} = \gamma^a_{~i}\gamma^b_{~j}C_{ab}
-//     FOR(i, j)
-//     {
-//         Cij[i][j] = 4. * dfdphi * (covd2phi[i][j] +
-//                             vars.Pi / chi_regularised *
-//                                 (vars.A[i][j] + 
-//                                  vars.h[i][j] * vars.K / (double)GR_SPACEDIM)) +
-// 		    4. * d2fdphi2 * d1.phi[i] * d1.phi[j];
-//     }
+    //     // decomposition of C_{ab} = \nabla_a\nabla_b\phi
+    //     Tensor<2, data_t> Cij; // C_{ij} = \gamma^a_{~i}\gamma^b_{~j}C_{ab}
+    //     FOR(i, j)
+    //     {
+    //         Cij[i][j] = 4. * dfdphi * (covd2phi[i][j] +
+    //                             vars.Pi / chi_regularised *
+    //                                 (vars.A[i][j] +
+    //                                  vars.h[i][j] * vars.K /
+    //                                  (double)GR_SPACEDIM)) +
+    // 		    4. * d2fdphi2 * d1.phi[i] * d1.phi[j];
+    //     }
 
-//     Tensor<2, data_t> Cij_UU = raise_all(Cij, h_UU);
+    //     Tensor<2, data_t> Cij_UU = raise_all(Cij, h_UU);
 
-//     Tensor<1, data_t> Ci; // C_i = -\gamma^a_{~i}n^bC_{ab}
-//     FOR(i)
-//     {
-//         Ci[i] = -4. * dfdphi * (d1.Pi[i] + vars.K * d1.phi[i] / (double)GR_SPACEDIM) - 4. * 
-//         d2fdphi2 * vars.Pi * d1.phi[i];
-//         FOR(j, k) { Ci[i] += - 4. * dfdphi * h_UU[j][k] * d1.phi[k] * vars.A[i][j]; }
-//     }
-//     Tensor<1, data_t> Ci_U;
-//     FOR(i) {
-//     	Ci_U[i] = 0.;
-// 	FOR(j) Ci_U[i] += h_UU[i][j] * Ci[j];
-//     }
-//     data_t Cnn = 4. * dfdphi / lapse_regularised * (rhs_vars.Pi - advec.Pi -
-//         vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
-// 	d2fdphi2 * vars.Pi * vars.Pi;
+    //     Tensor<1, data_t> Ci; // C_i = -\gamma^a_{~i}n^bC_{ab}
+    //     FOR(i)
+    //     {
+    //         Ci[i] = -4. * dfdphi * (d1.Pi[i] + vars.K * d1.phi[i] /
+    //         (double)GR_SPACEDIM) - 4. * d2fdphi2 * vars.Pi * d1.phi[i];
+    //         FOR(j, k) { Ci[i] += - 4. * dfdphi * h_UU[j][k] * d1.phi[k] *
+    //         vars.A[i][j]; }
+    //     }
+    //     Tensor<1, data_t> Ci_U;
+    //     FOR(i) {
+    //     	Ci_U[i] = 0.;
+    // 	FOR(j) Ci_U[i] += h_UU[i][j] * Ci[j];
+    //     }
+    //     data_t Cnn = 4. * dfdphi / lapse_regularised * (rhs_vars.Pi -
+    //     advec.Pi -
+    //         vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
+    // 	d2fdphi2 * vars.Pi * vars.Pi;
 
-//     // Useful quantity Vt
-//     /*data_t disc = h_UU[0][0] - Cij_UU[0][0] * vars.chi * (1. + Cnn) +
-// 		  Ci_U[0] * (vars.chi * Ci_U[0] - 2. * vars.shift[0]) + 
-// 	    	  Cnn * (h_UU[0][0] - 1. / chi_regularised * 
-// 				  vars.shift[0] / lapse_regularised *
-// 				  vars.shift[0] / lapse_regularised);
-//     */
-//     FOR(i, j) Cij_UU[i][j] *= vars.chi;
-//     Tensor<2, data_t> eff_met = (h_UU - Cij_UU) * (1. + Cnn);
-//     FOR(i,j) eff_met[i][j] += vars.chi * Ci_U[i] * Ci_U[j] -
-// 		Ci_U[i] * vars.shift[j] / lapse_regularised -
-// 		Ci_U[j] * vars.shift[i] / lapse_regularised -
-// 		Cnn / chi_regularised * vars.shift[i] / lapse_regularised *
-// 					vars.shift[j] / lapse_regularised;
-//     out.discriminant = compute_determinant_sym(eff_met);
-//     //if (h_UU[0] < 0.) disc = -disc;
+    //     // Useful quantity Vt
+    //     /*data_t disc = h_UU[0][0] - Cij_UU[0][0] * vars.chi * (1. + Cnn) +
+    // 		  Ci_U[0] * (vars.chi * Ci_U[0] - 2. * vars.shift[0]) +
+    // 	    	  Cnn * (h_UU[0][0] - 1. / chi_regularised *
+    // 				  vars.shift[0] / lapse_regularised *
+    // 				  vars.shift[0] / lapse_regularised);
+    //     */
+    //     FOR(i, j) Cij_UU[i][j] *= vars.chi;
+    //     Tensor<2, data_t> eff_met = (h_UU - Cij_UU) * (1. + Cnn);
+    //     FOR(i,j) eff_met[i][j] += vars.chi * Ci_U[i] * Ci_U[j] -
+    // 		Ci_U[i] * vars.shift[j] / lapse_regularised -
+    // 		Ci_U[j] * vars.shift[i] / lapse_regularised -
+    // 		Cnn / chi_regularised * vars.shift[i] / lapse_regularised *
+    // 					vars.shift[j] / lapse_regularised;
+    //     out.discriminant = compute_determinant_sym(eff_met);
+    //     //if (h_UU[0] < 0.) disc = -disc;
 
     return out;
 }

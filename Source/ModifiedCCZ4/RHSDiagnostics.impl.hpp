@@ -13,11 +13,11 @@
 template <class theory_t, class gauge_t, class deriv_t>
 RHSDiagnostics<theory_t, gauge_t, deriv_t>::RHSDiagnostics(
     theory_t a_theory, modified_params_t a_params, gauge_t a_gauge, double a_dx,
-    double a_sigma, double a_K_mean, double a_rho_mean, 
-    const std::array<double, CH_SPACEDIM> a_center,
-    double a_G_Newton)
+    double a_sigma, double a_K_mean, double a_rho_mean,
+    const std::array<double, CH_SPACEDIM> a_center, double a_G_Newton)
     : ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>(
-          a_theory, a_params, a_gauge, a_dx, a_sigma, a_K_mean, a_rho_mean, a_center, a_G_Newton)
+          a_theory, a_params, a_gauge, a_dx, a_sigma, a_K_mean, a_rho_mean,
+          a_center, a_G_Newton)
 {
 }
 
@@ -59,10 +59,9 @@ void RHSDiagnostics<theory_t, gauge_t, deriv_t>::compute(
     WeakCouplingConditions<data_t> weak_coupling_conditions =
         this->my_theory.compute_weak_coupling_conditions(
             theory_rhs, theory_vars, d1, d2, advec, coords);
-    
-    Discriminant<data_t> disc =
-        this->my_theory.compute_discriminant(
-            theory_rhs, theory_vars, d1, d2, advec, coords);
+
+    Discriminant<data_t> disc = this->my_theory.compute_discriminant(
+        theory_rhs, theory_vars, d1, d2, advec, coords);
 
     // Write the constraints into the output FArrayBox
     current_cell.store_vars(weak_coupling_conditions.g2,

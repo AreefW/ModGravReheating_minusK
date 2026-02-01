@@ -62,7 +62,7 @@ class SimulationParameters : public ModifiedGravitySimulationParametersBase<
         pp.load("kerr_center", kerr_params.center, center);
 
         // Oscillon
-        pp.load("obj_bound_cutoff", obj_bound_cutoff,0.95);
+        pp.load("obj_bound_cutoff", obj_bound_cutoff, 0.95);
 
 #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5 * kerr_params.mass);

@@ -13,11 +13,11 @@
 template <class theory_t, class gauge_t, class deriv_t>
 ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::ModifiedDiagnostics(
     theory_t a_theory, modified_params_t a_params, gauge_t a_gauge, double a_dx,
-    double a_sigma, double a_K_mean, double a_rho_mean, 
-    const std::array<double, CH_SPACEDIM> a_center,
-    double a_G_Newton)
+    double a_sigma, double a_K_mean, double a_rho_mean,
+    const std::array<double, CH_SPACEDIM> a_center, double a_G_Newton)
     : ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>(
-          a_theory, a_params, a_gauge, a_dx, a_sigma, a_K_mean, a_rho_mean, a_center, a_G_Newton)
+          a_theory, a_params, a_gauge, a_dx, a_sigma, a_K_mean, a_rho_mean,
+          a_center, a_G_Newton)
 {
 }
 
@@ -63,13 +63,16 @@ void ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::compute(
 
     data_t dfdphi, d2fdphi2, g2, dg2dphi, V_of_phi, dVdphi;
 
-    this->my_theory.my_coupling_and_potential.compute_coupling_and_potential(dfdphi, d2fdphi2,
-                                        g2, dg2dphi, V_of_phi, dVdphi, theory_vars, coords);
+    this->my_theory.my_coupling_and_potential.compute_coupling_and_potential(
+        dfdphi, d2fdphi2, g2, dg2dphi, V_of_phi, dVdphi, theory_vars, coords);
 
-    data_t my_Veff = V_of_phi-RGB*(this->my_theory.my_coupling_and_potential.get_coupling(theory_vars));
+    data_t my_Veff =
+        V_of_phi -
+        RGB * (this->my_theory.my_coupling_and_potential.get_coupling(
+                  theory_vars));
     current_cell.store_vars(my_Veff, c_Veff);
 
-    //Calculate different components of d^2phi/dt^2
+    // Calculate different components of d^2phi/dt^2
 
     data_t friction_term = theory_vars.lapse * theory_vars.K * theory_vars.Pi;
 
@@ -78,13 +81,14 @@ void ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::compute(
     FOR(i, j)
     {
         // includes non conformal parts of chris not included in chris_ULL
-        gradient_terms += -h_UU[i][j] * (0.5 * d1.chi[j] * theory_vars.lapse * d1.phi[i] -
-                                 theory_vars.chi * theory_vars.lapse * d2.phi[i][j] -
-                                 theory_vars.chi * d1.lapse[i] * d1.phi[j]);
+        gradient_terms +=
+            -h_UU[i][j] * (0.5 * d1.chi[j] * theory_vars.lapse * d1.phi[i] -
+                           theory_vars.chi * theory_vars.lapse * d2.phi[i][j] -
+                           theory_vars.chi * d1.lapse[i] * d1.phi[j]);
         FOR(k)
         {
-            gradient_terms += -theory_vars.chi * theory_vars.lapse * h_UU[i][j] * chris.ULL[k][i][j] *
-                      d1.phi[k];
+            gradient_terms += -theory_vars.chi * theory_vars.lapse *
+                              h_UU[i][j] * chris.ULL[k][i][j] * d1.phi[k];
         }
     }
 
@@ -92,25 +96,22 @@ void ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::compute(
 
     data_t potential_term = -theory_vars.lapse * dVdphi;
 
-    data_t g2_term = theory_rhs.Pi - friction_term - gradient_terms - GB_term - potential_term;
+    data_t g2_term = theory_rhs.Pi - friction_term - gradient_terms - GB_term -
+                     potential_term;
 
     current_cell.store_vars(friction_term, c_friction);
     current_cell.store_vars(gradient_terms, c_gradient);
     current_cell.store_vars(GB_term, c_GB);
     current_cell.store_vars(potential_term, c_potential);
     current_cell.store_vars(g2_term, c_g2);
-
 }
 
 template <class theory_t, class gauge_t, class deriv_t>
 template <class data_t>
-data_t ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::
-compute_RGB(const Vars<data_t> &theory_rhs,
-            const Vars<data_t> &vars,
-            const Vars<Tensor<1, data_t>> &d1,
-            const Diff2Vars<Tensor<2, data_t>> &d2,
-            const Vars<data_t> &advec,
-            const Coordinates<data_t> &coords) const
+data_t ModifiedDiagnostics<theory_t, gauge_t, deriv_t>::compute_RGB(
+    const Vars<data_t> &theory_rhs, const Vars<data_t> &vars,
+    const Vars<Tensor<1, data_t>> &d1, const Diff2Vars<Tensor<2, data_t>> &d2,
+    const Vars<data_t> &advec, const Coordinates<data_t> &coords) const
 {
     // set the coupling and potential values
     data_t dfdphi = 0.;
@@ -133,7 +134,8 @@ compute_RGB(const Vars<data_t> &theory_rhs,
     const data_t chi_regularised = simd_max(1e-6, vars.chi);
     const data_t lapse_regularised = simd_max(1e-6, vars.lapse);
 
-    ScalarVectorTensor<data_t> SVT = this->my_theory.compute_M_Ni_and_Mij(vars, d1, d2);
+    ScalarVectorTensor<data_t> SVT =
+        this->my_theory.compute_M_Ni_and_Mij(vars, d1, d2);
     data_t M = SVT.scalar;
     Tensor<1, data_t> Ni = SVT.vector;
     Tensor<2, data_t> Mij = SVT.tensor;

@@ -33,10 +33,10 @@ class PointExtrEvo
   public:
     //! The constructor
     PointExtrEvo(int a_comp1, int a_comp2, int a_num_points, double a_L,
-                     std::array<double, CH_SPACEDIM> a_center, double a_dt,
-                     double a_time)
-        : m_comp1(a_comp1), m_comp2(a_comp2), m_num_points(a_num_points), m_center(a_center),
-          m_L(a_L), m_dt(a_dt), m_time(a_time)
+                 std::array<double, CH_SPACEDIM> a_center, double a_dt,
+                 double a_time)
+        : m_comp1(a_comp1), m_comp2(a_comp2), m_num_points(a_num_points),
+          m_center(a_center), m_L(a_L), m_dt(a_dt), m_time(a_time)
     {
     }
 
@@ -52,7 +52,7 @@ class PointExtrEvo
         {
             MayDay::Error("Interpolator has not been initialised.");
         }
-        //std::vector<double> interp_var_data(m_num_points);
+        // std::vector<double> interp_var_data(m_num_points);
         std::vector<double> interp_var1(m_num_points);
         std::vector<double> interp_var2(m_num_points);
         std::vector<double> interp_x(m_num_points);
@@ -112,7 +112,6 @@ class PointExtrEvo
             output_file.write_time_data_line(data);
         }
     }
-    
 };
 
 #endif /* POINTEXTRACTIONEVO_HPP_ */

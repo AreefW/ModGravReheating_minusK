@@ -7,10 +7,10 @@
 #define HAMTAGGINGCRITERION_HPP_
 
 #include "Cell.hpp"
+#include "Coordinates.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
-#include "Coordinates.hpp"
 
 class HamTaggingCriterion
 {

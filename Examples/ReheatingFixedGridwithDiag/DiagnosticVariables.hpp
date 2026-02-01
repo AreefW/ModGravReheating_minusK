@@ -53,23 +53,36 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "Mom",
     "Ham_abs_sum",
 
-    "rho_phi", "rho_g2", "rho_g3", "rho_GB",
-    
+    "rho_phi",
+    "rho_g2",
+    "rho_g3",
+    "rho_GB",
+
     "rho_total",
-    
-    "rho_exc", 
-    "sqrt_gam", "rho_scaled", "S_scaled", "K_scaled", "A2", 
-    "rho_contrast", "sqrt_gam_exc",
-    
+
+    "rho_exc",
+    "sqrt_gam",
+    "rho_scaled",
+    "S_scaled",
+    "K_scaled",
+    "A2",
+    "rho_contrast",
+    "sqrt_gam_exc",
+
     "weak_coupling_condition_g2",
     "weak_coupling_condition_g3",
     "weak_coupling_condition_GB",
 
-    "friction", "gradient", "GB", "potential", "g2",
+    "friction",
+    "gradient",
+    "GB",
+    "potential",
+    "g2",
 
-    "Veff", "Discriminant"
-    
-    };
+    "Veff",
+    "Discriminant"
+
+};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

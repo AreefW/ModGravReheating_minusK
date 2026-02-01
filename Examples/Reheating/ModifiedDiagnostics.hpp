@@ -55,22 +55,21 @@ class ModifiedDiagnostics : public ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>
 
     //! Constructor of class RHSDiagnostics
     ModifiedDiagnostics(theory_t a_theory, modified_params_t a_params,
-                   gauge_t a_gauge, double a_dx, double a_sigma
-                   , double a_K_mean, double a_rho_mean,
-                   const std::array<double, CH_SPACEDIM> a_center,
-                   double a_G_Newton = 1.0);
+                        gauge_t a_gauge, double a_dx, double a_sigma,
+                        double a_K_mean, double a_rho_mean,
+                        const std::array<double, CH_SPACEDIM> a_center,
+                        double a_G_Newton = 1.0);
 
     //! The compute member which calculates the RHS at each point in the
     //! box
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
     template <class data_t>
-    data_t compute_RGB( const Vars<data_t> &theory_rhs,
-                        const Vars<data_t> &vars,
-                        const Vars<Tensor<1, data_t>> &d1,
-                        const Diff2Vars<Tensor<2, data_t>> &d2,
-                        const Vars<data_t> &advec,
-                        const Coordinates<data_t> &coords) const;
+    data_t compute_RGB(const Vars<data_t> &theory_rhs, const Vars<data_t> &vars,
+                       const Vars<Tensor<1, data_t>> &d1,
+                       const Diff2Vars<Tensor<2, data_t>> &d2,
+                       const Vars<data_t> &advec,
+                       const Coordinates<data_t> &coords) const;
 
     // double m_G_Newton;
 };

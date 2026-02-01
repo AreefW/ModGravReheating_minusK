@@ -51,7 +51,7 @@ class CustomExtraction
         {
             MayDay::Error("Interpolator has not been initialised.");
         }
-        //std::vector<double> interp_var_data(m_num_points);
+        // std::vector<double> interp_var_data(m_num_points);
         std::vector<double> interp_rho(1);
         std::vector<double> interp_x(m_num_points);
         std::vector<double> interp_y(m_num_points);
@@ -92,7 +92,6 @@ class CustomExtraction
         }
         output_file.write_time_data_line(interp_rho);
     }
-    
 };
 
 #endif /* CUSTOMEXTRACTION_HPP_ */

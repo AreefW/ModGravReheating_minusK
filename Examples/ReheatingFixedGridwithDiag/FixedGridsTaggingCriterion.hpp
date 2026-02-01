@@ -35,8 +35,9 @@ class FixedGridsTaggingCriterion
         const Coordinates<data_t> coords(current_cell, m_dx, m_center);
         // const data_t max_abs_xy = simd_max(abs(coords.x), abs(coords.y));
         // const data_t max_abs_xyz = simd_max(max_abs_xy, abs(coords.z));
-        // const data_t max_abs_xyL = simd_max(abs(coords.x) + m_L * ratio, abs(coords.y) + m_L * ratio);
-        // const data_t max_abs_xyzL = simd_max(max_abs_xy + m_L * ratio, abs(coords.z) + m_L * ratio);
+        // const data_t max_abs_xyL = simd_max(abs(coords.x) + m_L * ratio,
+        // abs(coords.y) + m_L * ratio); const data_t max_abs_xyzL =
+        // simd_max(max_abs_xy + m_L * ratio, abs(coords.z) + m_L * ratio);
         const data_t r = coords.get_radius();
         auto regrid = simd_compare_lt(r, m_L * ratio);
         // auto regrid = simd_compare_lt(max_abs_xyz, m_L * ratio);

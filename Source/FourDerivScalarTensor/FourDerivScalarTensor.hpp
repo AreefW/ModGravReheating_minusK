@@ -224,7 +224,6 @@ class FourDerivScalarTensor
         const vars_t<data_t> &advec, //!< the value of the advection terms
         const Coordinates<data_t> &coords)
         const; //!< the value of the coordinates
-
 };
 
 #include "FourDerivScalarTensor.impl.hpp"

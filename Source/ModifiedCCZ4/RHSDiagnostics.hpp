@@ -55,8 +55,8 @@ class RHSDiagnostics : public ModifiedCCZ4RHS<theory_t, gauge_t, deriv_t>
 
     //! Constructor of class RHSDiagnostics
     RHSDiagnostics(theory_t a_theory, modified_params_t a_params,
-                   gauge_t a_gauge, double a_dx, double a_sigma
-                   , double a_K_mean, double a_rho_mean,
+                   gauge_t a_gauge, double a_dx, double a_sigma,
+                   double a_K_mean, double a_rho_mean,
                    const std::array<double, CH_SPACEDIM> a_center,
                    double a_G_Newton = 1.0);
 

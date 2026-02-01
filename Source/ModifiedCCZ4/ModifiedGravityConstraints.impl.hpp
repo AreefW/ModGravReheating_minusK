@@ -15,12 +15,14 @@
 template <class theory_t>
 ModifiedGravityConstraints<theory_t>::ModifiedGravityConstraints(
     const theory_t a_theory, double dx,
-    const std::array<double, CH_SPACEDIM> a_center, double G_Newton, double rho_mean /*added for rho contrast*/,
-    int a_c_Ham, const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
+    const std::array<double, CH_SPACEDIM> a_center, double G_Newton,
+    double rho_mean /*added for rho contrast*/, int a_c_Ham,
+    const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
     const Interval &a_c_Moms_abs_terms /*defaulted*/)
     : Constraints(dx, a_c_Ham, a_c_Moms, a_c_Ham_abs_terms, a_c_Moms_abs_terms,
                   0.0 /*No cosmological constant*/),
-      my_theory(a_theory), m_center(a_center), m_G_Newton(G_Newton), m_rho_mean(rho_mean) /*added for rho contrast*/
+      my_theory(a_theory), m_center(a_center), m_G_Newton(G_Newton),
+      m_rho_mean(rho_mean) /*added for rho contrast*/
 {
 }
 
@@ -34,11 +36,12 @@ void ModifiedGravityConstraints<theory_t>::compute(
     const auto d1 = m_deriv.template diff1<BSSNTheoryVars>(current_cell);
     const auto d2 = m_deriv.template diff2<BSSNTheoryVars>(current_cell);
 
-    //const auto Tensor<1, data_t> shift = {current_cell.load_vars(c_shift1),current_cell.load_vars(c_shift2),current_cell.load_vars(c_shift3)};
+    // const auto Tensor<1, data_t> shift =
+    // {current_cell.load_vars(c_shift1),current_cell.load_vars(c_shift2),current_cell.load_vars(c_shift3)};
     //----
-   // const auto theory_vars = current_cell.template load_vars<Vars>();
-    const auto advec =
-        this->m_deriv.template advection<BSSNTheoryVars>(current_cell, vars.shift);
+    // const auto theory_vars = current_cell.template load_vars<Vars>();
+    const auto advec = this->m_deriv.template advection<BSSNTheoryVars>(
+        current_cell, vars.shift);
 
     // Inverse metric and Christoffel symbol
     const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
@@ -88,20 +91,21 @@ void ModifiedGravityConstraints<theory_t>::compute(
     out.rho = rho_and_Si.rho;
     current_cell.store_vars(out.rho, c_rho_total);
 
-    //out.rho = all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB;
-    
-    //out.rho_scaled = (all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB)/ pow(vars.chi, 3. / 2.);
+    // out.rho = all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB;
+
+    // out.rho_scaled = (all_rhos.phi+all_rhos.g2+all_rhos.g3+all_rhos.GB)/
+    // pow(vars.chi, 3. / 2.);
     out.rho_scaled = rho_and_Si.rho / pow(vars.chi, 3. / 2.);
     current_cell.store_vars(out.rho_scaled, c_rho_scaled);
-    //out.S_scaled = Sij_TF_and_S.S / pow(vars.chi, 3. / 2.);
-    out.rho_contrast = ((rho_and_Si.rho/m_rho_mean)-1);
+    // out.S_scaled = Sij_TF_and_S.S / pow(vars.chi, 3. / 2.);
+    out.rho_contrast = ((rho_and_Si.rho / m_rho_mean) - 1);
     current_cell.store_vars(out.rho_contrast, c_rho_contrast);
-    
+
     out.S_scaled = Sij_TF_and_S.S / pow(vars.chi, 3. / 2.);
     current_cell.store_vars(out.S_scaled, c_S_scaled);
 
     out.S = Sij_TF_and_S.S;
-    
+
     // Write the constraints into the output FArrayBox
     store_vars(out, current_cell);
 }
