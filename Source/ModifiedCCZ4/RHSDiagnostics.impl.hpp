@@ -71,6 +71,13 @@ void RHSDiagnostics<theory_t, gauge_t, deriv_t>::compute(
     current_cell.store_vars(weak_coupling_conditions.GB,
                             c_weak_coupling_condition_GB);
     current_cell.store_vars(disc.discriminant, c_Discriminant);
+    current_cell.store_vars(weak_coupling_conditions.Lm1, c_Lm1);
+    current_cell.store_vars(weak_coupling_conditions.RGBterm, c_RGBterm);
+    current_cell.store_vars(weak_coupling_conditions.ricci_term, c_ricci_term);
+    current_cell.store_vars(weak_coupling_conditions.sqrt_V, c_sqrt_V);
+    current_cell.store_vars(weak_coupling_conditions.nabla_phi, c_nabla_phi);
+    current_cell.store_vars(weak_coupling_conditions.nabla2_phi, c_nabla2_phi);
+    current_cell.store_vars(weak_coupling_conditions.absdfdphi, c_absdfdphi);
 }
 
 #endif /* RHSDIAGNOSTICS_IMPL_HPP_ */

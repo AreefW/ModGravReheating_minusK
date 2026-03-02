@@ -67,6 +67,13 @@ template <class data_t> struct WeakCouplingConditions
     data_t g2;
     data_t g3;
     data_t GB;
+    data_t Lm1;
+    data_t RGBterm;
+    data_t ricci_term;
+    data_t sqrt_V;
+    data_t nabla_phi;
+    data_t nabla2_phi;
+    data_t absdfdphi;
 };
 
 // Discriminant

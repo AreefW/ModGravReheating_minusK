@@ -1220,23 +1220,33 @@ WeakCouplingConditions<data_t> FourDerivScalarTensor<coupling_and_potential_t>::
 
     data_t s = sqrt(sqrt(nabla2_phi * nabla2_phi));
     // pout() << "s = " << s << endl;
+    out.nabla2_phi = s;
     data_t l = sqrt(nabla_phi * nabla_phi);
     // pout() << "l = " << l << endl;
+    out.nabla_phi = l;
     data_t Lm1 = simd_max(l, s);
     FOR(i, j)
     {
+        // |Rij|^1/2
         data_t r = sqrt(sqrt(ricci0.LL[i][j] * ricci0.LL[i][j]));
         // pout() << "r = " << r << endl;
-        Lm1 = simd_max(Lm1, r);
+        out.ricci_term = simd_max(out.ricci_term, r); 
     }
+    // This just tells if Rij > scalar sector 
+    Lm1 = simd_max(Lm1, out.ricci_term); 
     data_t abs_root_V = sqrt(sqrt(V_of_phi * V_of_phi));
     // pout() << "abs_root_V = " << abs_root_V << endl;
+    out.sqrt_V = abs_root_V;
     Lm1 = simd_max(Lm1, abs_root_V);
+
     RGB = sqrt(RGB * RGB);
     // pout() << "RGB = " << RGB << endl;
     Lm1 = simd_max(Lm1, sqrt(sqrt(RGB)));
+    out.RGBterm = sqrt(sqrt(RGB));
     // out.GB = Lm1 * Lm1 * dfdphi;
+    out.Lm1 = Lm1;
     out.GB = Lm1 * Lm1 * sqrt(dfdphi * dfdphi);
+    out.absdfdphi = sqrt(dfdphi * dfdphi);
     // pout() << "sqrt(dfdphi*dfdphi) = " << sqrt(dfdphi*dfdphi) << endl;
 
     data_t weak_g2 = vars.Pi * vars.Pi;
@@ -1267,6 +1277,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
     using namespace TensorAlgebra;
     const auto h_UU = compute_inverse_sym(vars.h);
     const auto chris = compute_christoffel(d1.h, h_UU);
+    data_t deth = compute_determinant(vars.h);
 
     const data_t chi_regularised = simd_max(1e-30, vars.chi);
     const data_t lapse_regularised = simd_max(1e-30, vars.lapse);
@@ -1299,9 +1310,9 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
         4. * dfdphi / lapse_regularised *
             (rhs_vars.Pi - advec.Pi -
              vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
-        d2fdphi2 * vars.Pi * vars.Pi;
+        4. * d2fdphi2 * vars.Pi * vars.Pi;
 
-    FOR(i, j) Omega_ij_UU[i][j] *= vars.chi;
+    FOR(i, j) Omega_ij_UU[i][j] *= vars.chi * vars.chi;
     Tensor<2, data_t> eff_met = (h_UU - Omega_ij_UU) * (1. + Omega_nn);
     FOR(i, j)
     eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
@@ -1309,7 +1320,8 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
                      Omega_i_U[j] * vars.shift[i] / lapse_regularised -
                      Omega_nn / chi_regularised * vars.shift[i] /
                          lapse_regularised * vars.shift[j] / lapse_regularised;
-    out.discriminant = compute_determinant_sym(eff_met);
+
+    out.discriminant = compute_determinant_sym(eff_met)/deth;
 
     // recalculate Omega_\mu\nu
     //    Tensor<2, data_t> covdtilde2phi;
