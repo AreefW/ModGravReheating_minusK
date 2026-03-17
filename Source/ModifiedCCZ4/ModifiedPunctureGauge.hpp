@@ -79,6 +79,9 @@ class ModifiedPunctureGauge
             rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +
                            m_params.shift_Gamma_coeff * vars.Gamma[i] -
                            m_params.eta * vars.shift[i];
+            // rhs.shift[i] = m_params.shift_advec_coeff * advec.shift[i] +
+            //                vars.lapse * vars.lapse * vars.Gamma[i] -
+            //                m_params.eta * vars.shift[i]; //--- added lapse^2 as shift condition, see eq. 39 in 1109.0546
             rhs.B[i] = 0.;
         }
     }

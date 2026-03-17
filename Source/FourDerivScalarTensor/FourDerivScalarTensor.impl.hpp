@@ -1277,7 +1277,7 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
     using namespace TensorAlgebra;
     const auto h_UU = compute_inverse_sym(vars.h);
     const auto chris = compute_christoffel(d1.h, h_UU);
-    data_t deth = compute_determinant(vars.h);
+    data_t deth = compute_determinant(vars.h); // missing chi and lapse
 
     const data_t chi_regularised = simd_max(1e-30, vars.chi);
     const data_t lapse_regularised = simd_max(1e-30, vars.lapse);
@@ -1310,18 +1310,33 @@ FourDerivScalarTensor<coupling_and_potential_t>::compute_discriminant(
         4. * dfdphi / lapse_regularised *
             (rhs_vars.Pi - advec.Pi -
              vars.chi * compute_dot_product(d1.phi, d1.lapse, h_UU)) +
-        4. * d2fdphi2 * vars.Pi * vars.Pi;
+        4. * d2fdphi2 * vars.Pi * vars.Pi; // h -> gamma
 
-    FOR(i, j) Omega_ij_UU[i][j] *= vars.chi * vars.chi;
-    Tensor<2, data_t> eff_met = (h_UU - Omega_ij_UU) * (1. + Omega_nn);
+    FOR(i, j) {Omega_ij_UU[i][j] *= vars.chi;}
+    // Tensor<2, data_t> eff_met = (h_UU - Omega_ij_UU) * (1. + Omega_nn); // h -> gamma, assign value in loops
+    
+    Tensor<2, data_t> eff_met;
     FOR(i, j)
-    eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
-                     Omega_i_U[i] * vars.shift[j] / lapse_regularised -
-                     Omega_i_U[j] * vars.shift[i] / lapse_regularised -
-                     Omega_nn / chi_regularised * vars.shift[i] /
-                         lapse_regularised * vars.shift[j] / lapse_regularised;
+    {
+        eff_met[i][j] = (h_UU[i][j] - Omega_ij_UU[i][j]) * (1. + Omega_nn);
+    }
+    FOR(i, j)
+    {
+        eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
+                         Omega_i_U[i] * vars.shift[j] / lapse_regularised -
+                         Omega_i_U[j] * vars.shift[i] / lapse_regularised -
+                         Omega_nn / chi_regularised * vars.shift[i] / lapse_regularised *
+                         vars.shift[j] / lapse_regularised;
+    }
 
-    out.discriminant = compute_determinant_sym(eff_met)/deth;
+    // FOR(i, j)
+    //     {eff_met[i][j] += vars.chi * Omega_i_U[i] * Omega_i_U[j] -
+    //                  Omega_i_U[i] * vars.shift[j] / lapse_regularised -
+    //                  Omega_i_U[j] * vars.shift[i] / lapse_regularised -
+    //                  Omega_nn / chi_regularised * vars.shift[i] /
+    //                      lapse_regularised * vars.shift[j] / lapse_regularised;}
+
+    out.discriminant = compute_determinant_sym(eff_met);
 
     // recalculate Omega_\mu\nu
     //    Tensor<2, data_t> covdtilde2phi;
